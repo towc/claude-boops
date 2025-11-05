@@ -1,0 +1,17 @@
+# Claude Code local session data
+.claude/
+
+# Node modules (if ever needed)
+node_modules/
+
+# Backup files
+*.backup*
+*.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
