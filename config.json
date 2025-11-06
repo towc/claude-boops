@@ -4,15 +4,9 @@
     "description": "When you press enter",
     "tones": [
       {
-        "freq": 240,
-        "duration": 0.06,
-        "volume": 0.3,
-        "silent": false
-      },
-      {
-        "freq": 200,
-        "duration": 0.07,
-        "volume": 0.3,
+        "freq": 350,
+        "duration": 0.035,
+        "volume": 0.25,
         "silent": false
       }
     ]
@@ -22,21 +16,15 @@
     "description": "When you answer a question or grant permission",
     "tones": [
       {
-        "freq": 320,
-        "duration": 0.05,
-        "volume": 0.3,
+        "freq": 350,
+        "duration": 0.035,
+        "volume": 0.25,
         "silent": false
       },
       {
-        "freq": 250,
-        "duration": 0.08,
-        "volume": 0.3,
-        "silent": false
-      },
-      {
-        "freq": 200,
-        "duration": 0.06,
-        "volume": 0.3,
+        "freq": 450,
+        "duration": 0.04,
+        "volume": 0.25,
         "silent": false
       }
     ]
@@ -46,21 +34,21 @@
     "description": "Permission prompts",
     "tones": [
       {
-        "freq": 200,
-        "duration": 0.08,
-        "volume": 0.3,
+        "freq": 550,
+        "duration": 0.055,
+        "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 320,
-        "duration": 0.08,
-        "volume": 0.3,
+        "freq": 700,
+        "duration": 0.055,
+        "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 240,
-        "duration": 0.08,
-        "volume": 0.3,
+        "freq": 850,
+        "duration": 0.06,
+        "volume": 0.28,
         "silent": false
       }
     ]
@@ -70,21 +58,21 @@
     "description": "Multiple choice questions",
     "tones": [
       {
-        "freq": 400,
-        "duration": 0.07,
-        "volume": 0.3,
+        "freq": 650,
+        "duration": 0.05,
+        "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 300,
-        "duration": 0.04,
-        "volume": 0.3,
+        "freq": 800,
+        "duration": 0.045,
+        "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 520,
-        "duration": 0.1,
-        "volume": 0.3,
+        "freq": 700,
+        "duration": 0.055,
+        "volume": 0.28,
         "silent": false
       }
     ]
@@ -94,21 +82,21 @@
     "description": "Normal completions",
     "tones": [
       {
-        "freq": 500,
-        "duration": 0.07,
-        "volume": 0.3,
-        "silent": false
-      },
-      {
         "freq": 650,
-        "duration": 0.07,
-        "volume": 0.3,
+        "duration": 0.035,
+        "volume": 0.26,
         "silent": false
       },
       {
-        "freq": 800,
-        "duration": 0.1,
-        "volume": 0.3,
+        "freq": 850,
+        "duration": 0.035,
+        "volume": 0.26,
+        "silent": false
+      },
+      {
+        "freq": 1000,
+        "duration": 0.04,
+        "volume": 0.26,
         "silent": false
       }
     ]
@@ -118,21 +106,21 @@
     "description": "Errors/failures",
     "tones": [
       {
-        "freq": 540,
-        "duration": 0.07,
-        "volume": 0.3,
+        "freq": 750,
+        "duration": 0.055,
+        "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 420,
-        "duration": 0.07,
-        "volume": 0.3,
+        "freq": 550,
+        "duration": 0.06,
+        "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 330,
+        "freq": 400,
         "duration": 0.07,
-        "volume": 0.3,
+        "volume": 0.28,
         "silent": false
       }
     ]

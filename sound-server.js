@@ -87,7 +87,7 @@ function generateAllSounds() {
 const server = http.createServer((req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
@@ -96,7 +96,17 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method === 'GET' && req.url === '/config') {
+  if (req.method === 'GET' && req.url === '/') {
+    // Serve the HTML tuner page
+    try {
+      const html = fs.readFileSync(path.join(SOUNDS_DIR, 'sound-tuner.html'), 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(html);
+    } catch (error) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Error loading tuner page');
+    }
+  } else if (req.method === 'GET' && req.url === '/config') {
     try {
       if (fs.existsSync(CONFIG_FILE)) {
         const config = fs.readFileSync(CONFIG_FILE, 'utf8');
@@ -149,5 +159,5 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, 'localhost', () => {
   console.log(`🔊 Sound server listening on http://localhost:${PORT}`);
   console.log(`Sounds directory: ${SOUNDS_DIR}`);
-  console.log('Open sound-tuner.html in your browser to start editing...');
+  console.log(`\n   Open http://localhost:${PORT} in your browser to edit sounds\n`);
 });

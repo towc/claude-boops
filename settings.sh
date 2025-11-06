@@ -20,27 +20,27 @@ cd "$BOOPS_DIR"
 
 # Check if server is already running
 if lsof -Pi :8765 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
-    echo "ℹ️  Server already running on port 8765"
-else
-    echo "🚀 Starting sound server on port 8765..."
-    node sound-server.js &
-    SERVER_PID=$!
-    echo "   Server PID: $SERVER_PID"
-
-    # Save PID for cleanup
-    echo $SERVER_PID > /tmp/claude-boops-server.pid
-
-    sleep 1
+    echo "⚠️  Server already running on port 8765"
+    echo "   Please stop the existing server first or use that instance"
+    exit 1
 fi
 
-# Open the tuner
-echo "🎨 Opening sound tuner in browser..."
-xdg-open "$BOOPS_DIR/sound-tuner.html" 2>/dev/null || \
-    open "$BOOPS_DIR/sound-tuner.html" 2>/dev/null || \
-    echo "   Please open: $BOOPS_DIR/sound-tuner.html in your browser"
+echo "🚀 Starting sound server on port 8765..."
+echo "   Press Ctrl+C to stop the server and exit"
+echo ""
 
-echo ""
-echo "✅ Sound editor is now running!"
-echo ""
-echo "To stop the server:"
-echo "  kill \$(cat /tmp/claude-boops-server.pid)"
+# Run server in foreground - Ctrl+C will naturally kill it
+node sound-server.js &
+SERVER_PID=$!
+
+# Wait for server to start
+sleep 1
+
+# Open the tuner from the server
+echo "🎨 Opening sound tuner at http://localhost:8765"
+xdg-open "http://localhost:8765" 2>/dev/null || \
+    open "http://localhost:8765" 2>/dev/null || \
+    echo "   Please open: http://localhost:8765 in your browser"
+
+# Wait for server process
+wait $SERVER_PID

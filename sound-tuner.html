@@ -138,6 +138,12 @@
 </head>
 <body>
     <h1>🔊 Claude Sound Tuner</h1>
+
+    <div id="connection-status" style="padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #444; background: #222; display: none; text-align: center;">
+        <span id="status-icon" style="font-size: 18px;">⚠️</span>
+        <span id="status-text" style="margin-left: 10px; font-weight: 500;">Checking connection...</span>
+    </div>
+
     <p style="color: #888; margin-bottom: 20px;">
         <strong>Interactive visualization:</strong> Drag up/down to change frequency, left/right to change duration.<br>
         Click or release to play. Changes save automatically.
@@ -230,13 +236,18 @@
 
         async function saveSoundsConfig() {
             try {
-                await fetch('http://localhost:8765/config', {
+                const response = await fetch('http://localhost:8765/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(soundsConfig)
+                    body: JSON.stringify(soundsConfig),
+                    signal: AbortSignal.timeout(2000)
                 });
+                if (response.ok) {
+                    showConnectionStatus(true);
+                }
             } catch (e) {
                 console.error('Failed to save config:', e);
+                showConnectionStatus(false, '❌ Server disconnected. Changes not saved!');
             }
         }
 
@@ -601,7 +612,8 @@
 
             try {
                 const response = await fetch('http://localhost:8765/update-sounds', {
-                    method: 'POST'
+                    method: 'POST',
+                    signal: AbortSignal.timeout(5000)
                 });
 
                 const result = await response.json();
@@ -609,13 +621,15 @@
                 if (result.success) {
                     statusDiv.style.background = '#00cc66';
                     statusDiv.textContent = '✓ Generated!';
+                    showConnectionStatus(true);
                 } else {
                     statusDiv.style.background = '#ff3366';
                     statusDiv.textContent = '✗ Error: ' + result.error;
                 }
             } catch (error) {
                 statusDiv.style.background = '#ff3366';
-                statusDiv.textContent = '✗ Server not running!';
+                statusDiv.textContent = '✗ Server not connected!';
+                showConnectionStatus(false, '❌ Cannot connect to server. Please run: ~/.claude/boops/settings.sh');
             }
 
             setTimeout(() => {
@@ -623,8 +637,47 @@
             }, 3000);
         }
 
+        // Connection status management
+        function showConnectionStatus(connected, message) {
+            const statusDiv = document.getElementById('connection-status');
+            const iconSpan = document.getElementById('status-icon');
+            const textSpan = document.getElementById('status-text');
+
+            if (connected) {
+                statusDiv.style.display = 'none';
+            } else {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#441111';
+                statusDiv.style.borderColor = '#884444';
+                iconSpan.textContent = '❌';
+                textSpan.textContent = message || 'Cannot connect to server';
+                textSpan.style.color = '#ff8888';
+            }
+        }
+
+        async function checkConnection() {
+            try {
+                const response = await fetch('http://localhost:8765/config', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(2000)
+                });
+                if (response.ok) {
+                    showConnectionStatus(true);
+                    return true;
+                }
+            } catch (e) {
+                showConnectionStatus(false, '❌ Server not running. Please run: ~/.claude/boops/settings.sh');
+                return false;
+            }
+            return false;
+        }
+
+        // Check connection periodically
+        setInterval(checkConnection, 5000);
+
         // Initial render - load config then render
         (async () => {
+            await checkConnection();
             soundsConfig = await loadSoundsConfig();
             renderSounds();
         })();
