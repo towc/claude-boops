@@ -3,8 +3,6 @@
 # Claude Boops - Installation Script
 # Sets up sound notifications for Claude Code
 
-set -e
-
 INSTALL_DIR="$HOME/.claude/boops"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 
@@ -96,11 +94,22 @@ echo "$MERGED" > "$SETTINGS_FILE"
 # Generate initial sound files
 echo "🎵 Generating sound files..."
 cd "$INSTALL_DIR"
-node sound-server.js &
-SERVER_PID=$!
-sleep 2
-curl -s -X POST http://localhost:8765/update-sounds > /dev/null 2>&1 || true
-kill $SERVER_PID 2>/dev/null || true
+
+# Try to generate sounds, but don't fail if server is already running
+(
+    node sound-server.js >/dev/null 2>&1 &
+    SERVER_PID=$!
+    sleep 2
+
+    if curl -s -X POST http://localhost:8765/update-sounds >/dev/null 2>&1; then
+        echo "   ✅ Sound files generated successfully"
+    else
+        echo "   ⚠️  Could not auto-generate sound files (port 8765 may be in use)"
+        echo "   Run '~/.claude/boops/settings.sh' to generate them manually"
+    fi
+
+    kill $SERVER_PID 2>/dev/null || true
+) || true
 
 echo ""
 echo "✅ Installation complete!"
