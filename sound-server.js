@@ -100,10 +100,10 @@ const server = http.createServer((req, res) => {
     // Serve the HTML tuner page
     try {
       const html = fs.readFileSync(path.join(SOUNDS_DIR, 'sound-tuner.html'), 'utf8');
-      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(html);
     } catch (error) {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('Error loading tuner page');
     }
   } else if (req.method === 'GET' && req.url === '/config') {
