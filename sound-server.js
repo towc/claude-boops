@@ -3,7 +3,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const SOUNDS_DIR = path.join(process.env.HOME, '.claude/sounds');
+// Use the directory where this script is located
+const SOUNDS_DIR = __dirname;
 const CONFIG_FILE = path.join(SOUNDS_DIR, 'config.json');
 const PORT = 8765;
 
