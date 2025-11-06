@@ -2,7 +2,7 @@
 # Notification sound for permission prompts
 
 INPUT=$(cat)
-SOUND_DIR="$HOME/.claude/sounds"
+SOUND_DIR="$HOME/.claude/boops"
 
 # Extract the notification message
 MESSAGE=$(echo "$INPUT" | jq -r '.message // ""' 2>/dev/null)
