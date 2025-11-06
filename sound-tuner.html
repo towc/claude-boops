@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+<!--
+    Claude Code Sound Tuner
+
+    Interactive web interface for customizing Claude Code sound notifications.
+
+    Features:
+    - Drag horizontally to adjust duration
+    - Drag vertically to adjust frequency (logarithmic scale)
+    - Direction locks after initial movement
+    - Click/release to play sounds
+    - Auto-saves to config.json
+
+    Requirements:
+    - sound-server.js running on port 8765
+
+    Usage:
+    1. Start server: node sound-server.js
+    2. Open this file in browser
+    3. Drag bars to edit, click "Generate Sound Files" when done
+-->
+<head>
+    <title>Claude Sound Tuner</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1 { color: #ff9500; margin-bottom: 10px; }
+        h2 { color: #0099ff; margin: 15px 0 8px 0; font-size: 17px; }
+        .sound-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .description {
+            color: #888;
+            font-size: 12px;
+            margin: 3px 0 10px 0;
+        }
+        .tone-row {
+            display: grid;
+            grid-template-columns: 30px 140px 120px 100px 60px 60px;
+            gap: 12px;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        .tone-row label {
+            font-size: 11px;
+            color: #888;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .tone-num {
+            color: #666;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #0099ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #0099ff;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .value-display {
+            color: #0099ff;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: center;
+        }
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        button {
+            background: #0099ff;
+            color: white;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 3px;
+        }
+        button:hover { background: #007acc; }
+        button.play { background: #00cc66; }
+        button.play:hover { background: #00aa55; }
+        button.reset { background: #ff9500; }
+        button.reset:hover { background: #cc7700; }
+        button.add-tone {
+            background: #555;
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        button.add-tone:hover { background: #666; }
+        button.remove-tone {
+            background: #ff3366;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        button.remove-tone:hover { background: #cc0044; }
+        .button-group {
+            display: flex;
+            gap: 6px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔊 Claude Sound Tuner</h1>
+    <p style="color: #888; margin-bottom: 20px;">
+        <strong>Interactive visualization:</strong> Drag up/down to change frequency, left/right to change duration.<br>
+        Click or release to play. Changes save automatically.
+    </p>
+
+    <canvas id="main-canvas" width="1200" height="600" style="width: 100%; height: 600px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; margin-bottom: 20px; cursor: grab;"></canvas>
+
+    <div id="sounds-container"></div>
+
+    <div style="text-align: center; margin: 20px 0;">
+        <button onclick="saveToServer()" style="background: #00cc66; font-size: 16px; padding: 10px 20px;">💾 Generate Sound Files</button>
+        <div id="save-status" style="padding: 8px; margin: 10px auto; border-radius: 4px; display: none; max-width: 400px;"></div>
+    </div>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        let dragState = null; // { soundId, toneIdx, startX, startY, startFreq, startDuration, lockAxis }
+        let hoverState = null; // { soundId, toneIdx }
+
+        const DEFAULT_SOUNDS = {
+            'user-submit': {
+                name: 'User Submit',
+                description: 'When you press enter',
+                tones: [
+                    { freq: 500, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 600, duration: 0.06, volume: 0.3, silent: false }
+                ]
+            },
+            'answer-submit': {
+                name: 'Answer Submit',
+                description: 'When you answer a question or grant permission',
+                tones: [
+                    { freq: 600, duration: 0.05, volume: 0.3, silent: false },
+                    { freq: 750, duration: 0.05, volume: 0.3, silent: false },
+                    { freq: 850, duration: 0.06, volume: 0.3, silent: false }
+                ]
+            },
+            'permission-needed': {
+                name: 'Permission Needed',
+                description: 'Permission prompts',
+                tones: [
+                    { freq: 650, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 750, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 650, duration: 0.08, volume: 0.3, silent: false }
+                ]
+            },
+            'question': {
+                name: 'Question',
+                description: 'Multiple choice questions',
+                tones: [
+                    { freq: 800, duration: 0.08, volume: 0.3, silent: false },
+                    { freq: 950, duration: 0.08, volume: 0.3, silent: false }
+                ]
+            },
+            'completion-success': {
+                name: 'Completion Success',
+                description: 'Normal completions',
+                tones: [
+                    { freq: 500, duration: 0.07, volume: 0.3, silent: false },
+                    { freq: 650, duration: 0.07, volume: 0.3, silent: false },
+                    { freq: 800, duration: 0.1, volume: 0.3, silent: false }
+                ]
+            },
+            'completion-error': {
+                name: 'Completion Error',
+                description: 'Errors/failures',
+                tones: [
+                    { freq: 700, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 500, duration: 0.08, volume: 0.3, silent: false },
+                    { freq: 400, duration: 0.1, volume: 0.3, silent: false }
+                ]
+            }
+        };
+
+        // Load from server or use defaults
+        async function loadSoundsConfig() {
+            try {
+                const response = await fetch('http://localhost:8765/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    console.log('✓ Loaded config from ~/.claude/sounds/config.json');
+                    return config;
+                }
+            } catch (e) {
+                console.log('No saved config, using defaults');
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_SOUNDS));
+        }
+
+        async function saveSoundsConfig() {
+            try {
+                await fetch('http://localhost:8765/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(soundsConfig)
+                });
+            } catch (e) {
+                console.error('Failed to save config:', e);
+            }
+        }
+
+        let soundsConfig = JSON.parse(JSON.stringify(DEFAULT_SOUNDS));
+
+        function playSound(soundId) {
+            const config = soundsConfig[soundId];
+            const now = audioContext.currentTime;
+            let startTime = now;
+
+            config.tones.forEach((tone, idx) => {
+                if (tone.silent) {
+                    startTime += tone.duration;
+                    return;
+                }
+
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = tone.freq;
+                oscillator.type = 'sine';
+
+                const fadeTime = Math.min(tone.duration * 0.1, 0.01);
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(tone.volume, startTime + fadeTime);
+                gainNode.gain.setValueAtTime(tone.volume, startTime + tone.duration - fadeTime);
+                gainNode.gain.linearRampToValueAtTime(0, startTime + tone.duration);
+
+                oscillator.start(startTime);
+                oscillator.stop(startTime + tone.duration);
+
+                startTime += tone.duration;
+            });
+        }
+
+        let saveTimeout = null;
+
+        function updateValue(soundId, toneIdx, param, value) {
+            if (param === 'silent') {
+                soundsConfig[soundId].tones[toneIdx][param] = value;
+            } else {
+                soundsConfig[soundId].tones[toneIdx][param] = parseFloat(value);
+            }
+            saveSoundsConfig(); // Save to localStorage
+            drawMainCanvas(); // Redraw canvas immediately
+
+            // Auto-save with debounce
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToServer();
+            }, 500); // Wait 500ms after last change
+        }
+
+        function addTone(soundId) {
+            soundsConfig[soundId].tones.push({ freq: 500, duration: 0.1, volume: 0.3, silent: false });
+            renderSounds();
+            saveToServer();
+        }
+
+        function removeTone(soundId, toneIdx) {
+            if (soundsConfig[soundId].tones.length > 1) {
+                soundsConfig[soundId].tones.splice(toneIdx, 1);
+                renderSounds();
+                    saveToServer();
+            }
+        }
+
+        function resetSound(soundId) {
+            soundsConfig[soundId] = JSON.parse(JSON.stringify(DEFAULT_SOUNDS[soundId]));
+            renderSounds();
+            saveToServer();
+        }
+
+        function resetAllSounds() {
+            soundsConfig = JSON.parse(JSON.stringify(DEFAULT_SOUNDS));
+            renderSounds();
+            saveToServer();
+        }
+
+        function renderSounds() {
+            const container = document.getElementById('sounds-container');
+            container.innerHTML = '';
+
+            Object.keys(soundsConfig).forEach(soundId => {
+                const config = soundsConfig[soundId];
+                const card = document.createElement('div');
+                card.className = 'sound-card';
+
+                let html = `
+                    <h2>${config.name}</h2>
+                    <div class="description">${config.description}</div>
+                `;
+
+                config.tones.forEach((tone, idx) => {
+                    html += `
+                        <div class="tone-row">
+                            <div class="tone-num">${idx + 1}</div>
+                            <div>
+                                <label>Frequency: <span class="value-display">${tone.freq} Hz</span></label>
+                                <input type="range" min="200" max="2000" step="10" value="${tone.freq}"
+                                    ${tone.silent ? 'disabled' : ''}
+                                    oninput="updateValue('${soundId}', ${idx}, 'freq', this.value); this.previousElementSibling.querySelector('span').textContent = this.value + ' Hz'">
+                            </div>
+                            <div>
+                                <label>Duration: <span class="value-display">${tone.duration}s</span></label>
+                                <input type="range" min="0.01" max="0.5" step="0.01" value="${tone.duration}"
+                                    oninput="updateValue('${soundId}', ${idx}, 'duration', this.value); this.previousElementSibling.querySelector('span').textContent = this.value + 's'">
+                            </div>
+                            <div>
+                                <label>Volume: <span class="value-display">${tone.volume}</span></label>
+                                <input type="range" min="0" max="1" step="0.05" value="${tone.volume}"
+                                    ${tone.silent ? 'disabled' : ''}
+                                    oninput="updateValue('${soundId}', ${idx}, 'volume', this.value); this.previousElementSibling.querySelector('span').textContent = this.value">
+                            </div>
+                            <div style="text-align: center;">
+                                <label>Silent</label>
+                                <input type="checkbox" ${tone.silent ? 'checked' : ''}
+                                    onchange="updateValue('${soundId}', ${idx}, 'silent', this.checked); renderSounds()">
+                            </div>
+                            <div>
+                                ${config.tones.length > 1 ? `<button class="remove-tone" onclick="removeTone('${soundId}', ${idx})">✕</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="button-group">
+                        <button class="play" onclick="playSound('${soundId}')">▶️ Play</button>
+                        <button class="add-tone" onclick="addTone('${soundId}')">➕ Add Tone</button>
+                        <button class="reset" onclick="resetSound('${soundId}')">↺ Reset to Default</button>
+                    </div>
+                `;
+
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+
+            // Add reset all button at the end
+            const resetAllCard = document.createElement('div');
+            resetAllCard.innerHTML = `
+                <div class="button-group" style="justify-content: center; margin: 20px 0;">
+                    <button class="reset" onclick="resetAllSounds()" style="padding: 10px 20px; font-size: 14px;">↺ Reset All Sounds to Default</button>
+                </div>
+            `;
+            container.appendChild(resetAllCard);
+
+            // Draw main canvas
+            drawMainCanvas();
+        }
+
+        function drawMainCanvas() {
+            const canvas = document.getElementById('main-canvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear canvas
+            ctx.fillStyle = '#0d0d0d';
+            ctx.fillRect(0, 0, width, height);
+
+            const soundIds = Object.keys(soundsConfig);
+            const soundHeight = height / soundIds.length;
+            const labelWidth = 160;
+            const padding = 10;
+            const minFreq = 200;
+            const maxFreq = 2000;
+
+            // Logarithmic scale helper
+            const logMin = Math.log(minFreq);
+            const logMax = Math.log(maxFreq);
+            const freqToY = (freq, rowStart) => {
+                const logFreq = Math.log(freq);
+                const normalized = (logFreq - logMin) / (logMax - logMin);
+                return rowStart + soundHeight - padding - (normalized * (soundHeight - padding * 2));
+            };
+
+            soundIds.forEach((soundId, soundIdx) => {
+                const config = soundsConfig[soundId];
+                const yStart = soundIdx * soundHeight;
+
+                // Draw background
+                ctx.fillStyle = soundIdx % 2 === 0 ? '#121212' : '#0d0d0d';
+                ctx.fillRect(0, yStart, width, soundHeight);
+
+                // Draw sound label
+                ctx.fillStyle = '#0099ff';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.fillText(config.name, padding, yStart + soundHeight / 2 + 5);
+
+                // Calculate total duration
+                const totalDuration = config.tones.reduce((sum, tone) => sum + tone.duration, 0);
+                const availableWidth = width - labelWidth - padding * 3;
+                const pixelsPerSecond = availableWidth / Math.max(totalDuration, 0.5);
+
+                const graphStart = labelWidth + padding * 2;
+
+                // Draw frequency grid (horizontal lines) - only major markers
+                const freqMarkers = [200, 500, 1000, 2000];
+                freqMarkers.forEach(freq => {
+                    const y = freqToY(freq, yStart);
+                    ctx.strokeStyle = '#1a1a1a';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(graphStart, y);
+                    ctx.lineTo(width - padding, y);
+                    ctx.stroke();
+
+                    // Draw frequency label on all rows
+                    ctx.fillStyle = '#444';
+                    ctx.font = '8px monospace';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`${freq}`, graphStart - 5, y + 3);
+                    ctx.textAlign = 'left';
+                });
+
+                // Draw time grid (vertical lines) - only 100ms intervals
+                for (let t = 0.1; t <= 0.5; t += 0.1) {
+                    const x = graphStart + (t * pixelsPerSecond);
+                    ctx.strokeStyle = '#1a1a1a';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, yStart + padding);
+                    ctx.lineTo(x, yStart + soundHeight - padding);
+                    ctx.stroke();
+
+                    // Draw time labels on all rows
+                    ctx.fillStyle = '#444';
+                    ctx.font = '8px monospace';
+                    ctx.fillText(`${Math.round(t * 1000)}`, x - 8, yStart + padding + 8);
+                }
+
+                let currentX = graphStart;
+
+                config.tones.forEach((tone, toneIdx) => {
+                    const toneWidth = tone.duration * pixelsPerSecond;
+                    const isHovered = hoverState && hoverState.soundId === soundId && hoverState.toneIdx === toneIdx;
+
+                    if (tone.silent) {
+                        // Draw silent section
+                        const silentY = yStart + padding;
+                        const silentHeight = soundHeight - padding * 2;
+
+                        ctx.fillStyle = isHovered ? '#1a1a1a' : '#0a0a0a';
+                        ctx.fillRect(currentX + 1, silentY, toneWidth - 2, silentHeight);
+
+                        ctx.strokeStyle = isHovered ? '#555' : '#1a1a1a';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([3, 3]);
+                        ctx.strokeRect(currentX + 1, silentY, toneWidth - 2, silentHeight);
+                        ctx.setLineDash([]);
+
+                        ctx.fillStyle = '#555';
+                        ctx.font = '9px sans-serif';
+                        ctx.fillText('silent', currentX + 5, yStart + soundHeight / 2 + 3);
+                    } else {
+                        // Map frequency to height (logarithmic)
+                        // Draw a horizontal line at the frequency level
+                        const freqY = freqToY(tone.freq, yStart);
+
+                        // Map frequency to color
+                        const freqNormalized = (Math.log(tone.freq) - logMin) / (logMax - logMin);
+                        const hue = 200 + (freqNormalized * 80);
+
+                        // Draw filled area from frequency line to a fixed baseline
+                        const baselineHeight = 12;
+                        const barTop = freqY - baselineHeight / 2;
+                        const barBottom = freqY + baselineHeight / 2;
+
+                        // Draw the frequency indicator bar
+                        const gradient = ctx.createLinearGradient(0, barTop, 0, barBottom);
+                        if (isHovered) {
+                            gradient.addColorStop(0, `hsl(${hue}, 80%, 65%)`);
+                            gradient.addColorStop(0.5, `hsl(${hue}, 90%, 70%)`);
+                            gradient.addColorStop(1, `hsl(${hue}, 80%, 65%)`);
+                        } else {
+                            gradient.addColorStop(0, `hsl(${hue}, 70%, 45%)`);
+                            gradient.addColorStop(0.5, `hsl(${hue}, 80%, 55%)`);
+                            gradient.addColorStop(1, `hsl(${hue}, 70%, 45%)`);
+                        }
+
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(currentX + 1, barTop, toneWidth - 2, baselineHeight);
+
+                        // Draw border
+                        ctx.strokeStyle = isHovered ? '#0099ff' : `hsl(${hue}, 60%, 30%)`;
+                        ctx.lineWidth = isHovered ? 2 : 1;
+                        ctx.strokeRect(currentX + 1, barTop, toneWidth - 2, baselineHeight);
+
+                        // Draw labels (only if space)
+                        if (toneWidth > 40) {
+                            // Frequency above the bar
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 11px monospace';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(`${tone.freq}Hz`, currentX + toneWidth / 2, barTop - 4);
+
+                            // Duration below the bar
+                            ctx.fillStyle = '#999';
+                            ctx.font = '9px monospace';
+                            ctx.fillText(`${(tone.duration * 1000).toFixed(0)}ms`, currentX + toneWidth / 2, barBottom + 12);
+                            ctx.textAlign = 'left';
+                        }
+                    }
+
+                    currentX += toneWidth;
+                });
+
+                // Draw separator line
+                if (soundIdx < soundIds.length - 1) {
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, yStart + soundHeight);
+                    ctx.lineTo(width, yStart + soundHeight);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function getToneAtPosition(x, y) {
+            const canvas = document.getElementById('main-canvas');
+            const soundIds = Object.keys(soundsConfig);
+            const soundHeight = canvas.height / soundIds.length;
+            const labelWidth = 160;
+            const padding = 10;
+
+            const soundIdx = Math.floor(y / soundHeight);
+            if (soundIdx < 0 || soundIdx >= soundIds.length) return null;
+
+            const soundId = soundIds[soundIdx];
+            const config = soundsConfig[soundId];
+            const totalDuration = config.tones.reduce((sum, tone) => sum + tone.duration, 0);
+            const availableWidth = canvas.width - labelWidth - padding * 3;
+            const pixelsPerSecond = availableWidth / Math.max(totalDuration, 0.5);
+
+            let currentX = labelWidth + padding * 2;
+            for (let toneIdx = 0; toneIdx < config.tones.length; toneIdx++) {
+                const tone = config.tones[toneIdx];
+                const toneWidth = tone.duration * pixelsPerSecond;
+
+                if (x >= currentX && x < currentX + toneWidth) {
+                    return { soundId, toneIdx, pixelsPerSecond, soundHeight };
+                }
+                currentX += toneWidth;
+            }
+            return null;
+        }
+
+        async function saveToServer() {
+            const statusDiv = document.getElementById('save-status');
+
+            statusDiv.style.display = 'inline-block';
+            statusDiv.style.background = '#555';
+            statusDiv.style.color = '#fff';
+            statusDiv.textContent = 'Generating...';
+
+            try {
+                const response = await fetch('http://localhost:8765/update-sounds', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.style.background = '#00cc66';
+                    statusDiv.textContent = '✓ Generated!';
+                } else {
+                    statusDiv.style.background = '#ff3366';
+                    statusDiv.textContent = '✗ Error: ' + result.error;
+                }
+            } catch (error) {
+                statusDiv.style.background = '#ff3366';
+                statusDiv.textContent = '✗ Server not running!';
+            }
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initial render - load config then render
+        (async () => {
+            soundsConfig = await loadSoundsConfig();
+            renderSounds();
+        })();
+
+        // Canvas interaction
+        const mainCanvas = document.getElementById('main-canvas');
+
+        mainCanvas.addEventListener('mousedown', (e) => {
+            const rect = mainCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (mainCanvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
+
+            const tone = getToneAtPosition(x, y);
+            if (tone) {
+                const { soundId, toneIdx, pixelsPerSecond, soundHeight } = tone;
+                const config = soundsConfig[soundId].tones[toneIdx];
+
+                dragState = {
+                    soundId,
+                    toneIdx,
+                    startX: x,
+                    startY: y,
+                    startFreq: config.freq,
+                    startDuration: config.duration,
+                    pixelsPerSecond,
+                    soundHeight,
+                    hasMoved: false
+                };
+                mainCanvas.style.cursor = 'grabbing';
+            }
+        });
+
+        mainCanvas.addEventListener('mousemove', (e) => {
+            const rect = mainCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (mainCanvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
+
+            // Update hover state
+            if (!dragState) {
+                const tone = getToneAtPosition(x, y);
+                if (tone && (!hoverState || hoverState.soundId !== tone.soundId || hoverState.toneIdx !== tone.toneIdx)) {
+                    hoverState = { soundId: tone.soundId, toneIdx: tone.toneIdx };
+                    drawMainCanvas();
+                } else if (!tone && hoverState) {
+                    hoverState = null;
+                    drawMainCanvas();
+                }
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragState) return;
+
+            const rect = mainCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (mainCanvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
+
+            const tone = soundsConfig[dragState.soundId].tones[dragState.toneIdx];
+            if (tone.silent) return;
+
+            // Calculate deltas
+            const deltaX = x - dragState.startX;
+            const deltaY = y - dragState.startY;
+
+            // Determine lock axis if not set yet (based on initial movement direction)
+            if (!dragState.lockAxis && (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3)) {
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    dragState.lockAxis = 'horizontal';
+                } else {
+                    dragState.lockAxis = 'vertical';
+                }
+            }
+
+            // Mark as moved if significant movement
+            if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+                dragState.hasMoved = true;
+            }
+
+            // Update duration (horizontal drag) - only if locked horizontal or no lock yet
+            if (dragState.lockAxis === 'horizontal' || !dragState.lockAxis) {
+                const durationChange = deltaX / dragState.pixelsPerSecond;
+                let newDuration = Math.max(0.01, Math.min(0.5, dragState.startDuration + durationChange));
+                newDuration = Math.round(newDuration * 100) / 100;
+                tone.duration = newDuration;
+            }
+
+            // Update frequency (vertical drag) - only if locked vertical or no lock yet
+            if (dragState.lockAxis === 'vertical' || !dragState.lockAxis) {
+                const minFreq = 200;
+                const maxFreq = 2000;
+
+                // Convert to logarithmic scale
+                const logMin = Math.log(minFreq);
+                const logMax = Math.log(maxFreq);
+                const logRange = logMax - logMin;
+
+                // Calculate change in log space (proportional change)
+                const logChange = (-deltaY / dragState.soundHeight) * logRange;
+                const startLogFreq = Math.log(dragState.startFreq);
+                let newLogFreq = Math.max(logMin, Math.min(logMax, startLogFreq + logChange));
+
+                // Convert back to linear frequency
+                let newFreq = Math.exp(newLogFreq);
+                newFreq = Math.round(newFreq / 10) * 10;
+                tone.freq = newFreq;
+            }
+
+            // Update UI
+            drawMainCanvas();
+
+            // Trigger auto-save
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveSoundsConfig();
+                saveToServer();
+            }, 500);
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (dragState) {
+                const soundId = dragState.soundId;
+                dragState = null;
+                mainCanvas.style.cursor = 'grab';
+
+                // Save config immediately on release
+                saveSoundsConfig();
+
+                // Play the sound
+                playSound(soundId);
+
+                // Re-render to update slider displays
+                renderSounds();
+            }
+        });
+    </script>
+</body>
+</html>

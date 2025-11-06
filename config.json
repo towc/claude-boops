@@ -1,0 +1,140 @@
+{
+  "user-submit": {
+    "name": "User Submit",
+    "description": "When you press enter",
+    "tones": [
+      {
+        "freq": 240,
+        "duration": 0.06,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 200,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      }
+    ]
+  },
+  "answer-submit": {
+    "name": "Answer Submit",
+    "description": "When you answer a question or grant permission",
+    "tones": [
+      {
+        "freq": 320,
+        "duration": 0.05,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 250,
+        "duration": 0.08,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 200,
+        "duration": 0.06,
+        "volume": 0.3,
+        "silent": false
+      }
+    ]
+  },
+  "permission-needed": {
+    "name": "Permission Needed",
+    "description": "Permission prompts",
+    "tones": [
+      {
+        "freq": 200,
+        "duration": 0.08,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 320,
+        "duration": 0.08,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 240,
+        "duration": 0.08,
+        "volume": 0.3,
+        "silent": false
+      }
+    ]
+  },
+  "question": {
+    "name": "Question",
+    "description": "Multiple choice questions",
+    "tones": [
+      {
+        "freq": 400,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 300,
+        "duration": 0.04,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 520,
+        "duration": 0.1,
+        "volume": 0.3,
+        "silent": false
+      }
+    ]
+  },
+  "completion-success": {
+    "name": "Completion Success",
+    "description": "Normal completions",
+    "tones": [
+      {
+        "freq": 500,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 650,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 800,
+        "duration": 0.1,
+        "volume": 0.3,
+        "silent": false
+      }
+    ]
+  },
+  "completion-error": {
+    "name": "Completion Error",
+    "description": "Errors/failures",
+    "tones": [
+      {
+        "freq": 540,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 420,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      },
+      {
+        "freq": 330,
+        "duration": 0.07,
+        "volume": 0.3,
+        "silent": false
+      }
+    ]
+  }
+}
