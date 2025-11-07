@@ -18,7 +18,8 @@
     Usage:
     1. Start server: node sound-server.js
     2. Open this file in browser
-    3. Drag bars to edit, click "Generate Sound Files" when done
+    3. Drag bars to edit - changes save automatically to config.json
+    4. Restart Claude Code for changes to take effect
 -->
 <head>
     <meta charset="UTF-8">
@@ -155,9 +156,8 @@
 
     <div id="sounds-container"></div>
 
-    <div style="text-align: center; margin: 20px 0;">
-        <button onclick="saveToServer()" style="background: #00cc66; font-size: 16px; padding: 10px 20px;">💾 Generate Sound Files</button>
-        <div id="save-status" style="padding: 8px; margin: 10px auto; border-radius: 4px; display: none; max-width: 400px;"></div>
+    <div style="text-align: center; margin: 20px 0; color: #888; font-style: italic;">
+        Changes are saved automatically. Restart Claude Code for them to take effect.
     </div>
 
     <script>
@@ -605,38 +605,18 @@
         }
 
         async function saveToServer() {
-            const statusDiv = document.getElementById('save-status');
-
-            statusDiv.style.display = 'inline-block';
-            statusDiv.style.background = '#555';
-            statusDiv.style.color = '#fff';
-            statusDiv.textContent = 'Generating...';
-
+            // Save config.json only (no WAV generation - sounds are generated dynamically)
             try {
-                const response = await fetch('http://localhost:8765/update-sounds', {
+                await fetch('http://localhost:8765/config', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(soundsConfig),
                     signal: AbortSignal.timeout(5000)
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    statusDiv.style.background = '#00cc66';
-                    statusDiv.textContent = '✓ Generated!';
-                    showConnectionStatus(true);
-                } else {
-                    statusDiv.style.background = '#ff3366';
-                    statusDiv.textContent = '✗ Error: ' + result.error;
-                }
+                showConnectionStatus(true);
             } catch (error) {
-                statusDiv.style.background = '#ff3366';
-                statusDiv.textContent = '✗ Server not connected!';
                 showConnectionStatus(false, '❌ Cannot connect to server. Please run settings.sh from the plugin directory.');
             }
-
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 3000);
         }
 
         // Connection status management

@@ -52,20 +52,20 @@
     "description": "Normal completions",
     "tones": [
       {
-        "freq": 590,
+        "freq": 290,
         "duration": 0.14,
         "volume": 0.26,
         "silent": false
       },
       {
-        "freq": 790,
+        "freq": 400,
         "duration": 0.15,
         "volume": 0.26,
         "silent": false
       },
       {
-        "freq": 1070,
-        "duration": 0.14,
+        "freq": 610,
+        "duration": 0.11,
         "volume": 0.26,
         "silent": false
       }
