@@ -124,7 +124,11 @@ function playSound(soundId) {
 
       log(`Using custom sound file: ${filepath}`);
       // Play file directly
-      player = spawn('paplay', [filepath], { stdio: ['ignore', 'ignore', 'ignore'] });
+      player = spawn('paplay', [filepath], {
+        stdio: ['ignore', 'ignore', 'ignore'],
+        detached: true
+      });
+      player.unref(); // Allow parent to exit independently
     } else {
       // Generate WAV dynamically from tones
       const frequencies = soundConfig.tones.map(t => t.silent ? 0 : t.freq);
@@ -137,7 +141,11 @@ function playSound(soundId) {
       fs.writeFileSync(tempFile, wav);
 
       // Play temp file and delete when done
-      player = spawn('paplay', [tempFile], { stdio: ['ignore', 'ignore', 'ignore'] });
+      player = spawn('paplay', [tempFile], {
+        stdio: ['ignore', 'ignore', 'ignore'],
+        detached: true
+      });
+      player.unref(); // Allow parent to exit independently
 
       player.on('exit', () => {
         try {
@@ -182,30 +190,29 @@ async function determineSound(hookType, hookData) {
           .filter(line => line.trim())
           .map(line => JSON.parse(line));
 
-        // Look at the last few assistant messages
-        const recentMessages = transcript.slice(-50).reverse();
+        // Look at only the LAST assistant message (not the last 50!)
+        const recentMessages = transcript.slice(-10).reverse();
+        const lastAssistantEntry = recentMessages
+          .find(entry => entry.message?.role === 'assistant');
 
-        // Check if ANY recent assistant message had AskUserQuestion
-        const hasRecentQuestion = recentMessages
-          .filter(entry => entry.message?.role === 'assistant')
-          .some(entry => {
-            const tools = entry.message?.content?.filter(c => c.type === 'tool_use') || [];
-            return tools.some(tool => tool.name === 'AskUserQuestion');
-          });
+        if (lastAssistantEntry) {
+          // Check if the last assistant message had AskUserQuestion
+          const tools = lastAssistantEntry.message?.content?.filter(c => c.type === 'tool_use') || [];
+          const hasQuestion = tools.some(tool => tool.name === 'AskUserQuestion');
 
-        if (hasRecentQuestion) {
-          log('Detected answer to question');
-          return 'answer-submit';
-        }
+          if (hasQuestion) {
+            log('Detected answer to question');
+            return 'answer-submit';
+          }
 
-        // Also check text for question patterns
-        const lastAssistantText = recentMessages
-          .find(entry => entry.message?.role === 'assistant')
-          ?.message?.content?.find(c => c.type === 'text')?.text || '';
+          // Also check text for question patterns in the last message
+          const lastAssistantText = lastAssistantEntry.message?.content
+            ?.find(c => c.type === 'text')?.text || '';
 
-        if (/(which|what|would you like|choose|select one|permission).*\?/i.test(lastAssistantText)) {
-          log('Detected answer to text question');
-          return 'answer-submit';
+          if (/(which|what|would you like|choose|select one|permission).*\?/i.test(lastAssistantText)) {
+            log('Detected answer to text question');
+            return 'answer-submit';
+          }
         }
       } catch (e) {
         log(`Error reading transcript: ${e.message}`);
