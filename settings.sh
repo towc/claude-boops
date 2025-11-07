@@ -3,16 +3,18 @@
 # Claude Boops - Settings Interface
 # Opens the sound tuner and starts the server
 
-BOOPS_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/boops}"
+# Detect script location - works for both marketplace and manual install
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BOOPS_DIR="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}}"
 
 echo "🔊 Claude Boops - Sound Editor"
 echo "=============================="
 echo ""
 
-# Check if installed
-if [ ! -d "$BOOPS_DIR" ]; then
-    echo "❌ Error: Claude Boops not installed"
-    echo "   Run setup.sh first"
+# Check if sound-server.js exists in the boops directory
+if [ ! -f "$BOOPS_DIR/sound-server.js" ]; then
+    echo "❌ Error: Claude Boops not properly installed"
+    echo "   Missing sound-server.js in $BOOPS_DIR"
     exit 1
 fi
 
