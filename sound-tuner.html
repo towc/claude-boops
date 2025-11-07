@@ -148,7 +148,8 @@
     </div>
 
     <p style="color: #888; margin-bottom: 20px;">
-        <strong>Interactive visualization:</strong> Drag up/down to change frequency, left/right to change duration.<br>
+        <strong>Interactive visualization:</strong> Drag up/down to change frequency (snaps to musical semitones), left/right to change duration.<br>
+        <strong>Keyboard controls:</strong> Hover over a tone and use arrow keys - Up/Down for semitones, Left/Right for duration (±10ms).<br>
         Click or release to play. Changes save automatically.
     </p>
 
@@ -165,6 +166,26 @@
 
         let dragState = null; // { soundId, toneIdx, startX, startY, startFreq, startDuration, lockAxis }
         let hoverState = null; // { soundId, toneIdx }
+
+        // Musical note utilities
+        const A4_FREQ = 440; // A4 reference frequency
+        const A4_MIDI = 69;  // A4 MIDI note number
+
+        function freqToSemitone(freq) {
+            // Convert frequency to semitone (MIDI note number)
+            return 12 * Math.log2(freq / A4_FREQ) + A4_MIDI;
+        }
+
+        function semitoneToFreq(semitone) {
+            // Convert semitone (MIDI note number) to frequency
+            return A4_FREQ * Math.pow(2, (semitone - A4_MIDI) / 12);
+        }
+
+        function snapToSemitone(freq) {
+            // Snap frequency to nearest semitone
+            const semitone = Math.round(freqToSemitone(freq));
+            return Math.round(semitoneToFreq(semitone));
+        }
 
         const DEFAULT_SOUNDS = {
             'user-submit': {
@@ -761,10 +782,9 @@
                 const startLogFreq = Math.log(dragState.startFreq);
                 let newLogFreq = Math.max(logMin, Math.min(logMax, startLogFreq + logChange));
 
-                // Convert back to linear frequency
+                // Convert back to linear frequency and snap to semitone
                 let newFreq = Math.exp(newLogFreq);
-                newFreq = Math.round(newFreq / 10) * 10;
-                tone.freq = newFreq;
+                tone.freq = snapToSemitone(newFreq);
             }
 
             // Update UI
@@ -792,6 +812,52 @@
 
                 // Re-render to update slider displays
                 renderSounds();
+            }
+        });
+
+        // Arrow key controls for hovered tone
+        document.addEventListener('keydown', (e) => {
+            if (!hoverState || dragState) return; // Only when hovering, not dragging
+
+            const { soundId, toneIdx } = hoverState;
+            const tone = soundsConfig[soundId].tones[toneIdx];
+            let changed = false;
+
+            if (e.key === 'ArrowUp') {
+                // Increase frequency by one semitone
+                const currentSemitone = freqToSemitone(tone.freq);
+                tone.freq = Math.round(semitoneToFreq(currentSemitone + 1));
+                changed = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                // Decrease frequency by one semitone
+                const currentSemitone = freqToSemitone(tone.freq);
+                tone.freq = Math.round(semitoneToFreq(currentSemitone - 1));
+                changed = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                // Increase duration by 10ms
+                tone.duration = Math.min(tone.duration + 0.01, 0.5);
+                changed = true;
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                // Decrease duration by 10ms
+                tone.duration = Math.max(tone.duration - 0.01, 0.01);
+                changed = true;
+                e.preventDefault();
+            }
+
+            if (changed) {
+                drawMainCanvas();
+                renderSounds();
+                saveSoundsConfig();
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveToServer();
+                }, 500);
+
+                // Play the sound to hear the change
+                playSound(soundId);
             }
         });
     </script>
