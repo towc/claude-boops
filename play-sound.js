@@ -181,43 +181,7 @@ async function determineSound(hookType, hookData) {
   }
 
   if (hookType === 'submit') {
-    // Check if we're answering a question
-    const transcriptPath = hookData?.transcript_path;
-    if (transcriptPath && fs.existsSync(transcriptPath)) {
-      try {
-        const transcript = fs.readFileSync(transcriptPath, 'utf8')
-          .split('\n')
-          .filter(line => line.trim())
-          .map(line => JSON.parse(line));
-
-        // Look at only the LAST assistant message (not the last 50!)
-        const recentMessages = transcript.slice(-10).reverse();
-        const lastAssistantEntry = recentMessages
-          .find(entry => entry.message?.role === 'assistant');
-
-        if (lastAssistantEntry) {
-          // Check if the last assistant message had AskUserQuestion
-          const tools = lastAssistantEntry.message?.content?.filter(c => c.type === 'tool_use') || [];
-          const hasQuestion = tools.some(tool => tool.name === 'AskUserQuestion');
-
-          if (hasQuestion) {
-            log('Detected answer to question');
-            return 'answer-submit';
-          }
-
-          // Also check text for question patterns in the last message
-          const lastAssistantText = lastAssistantEntry.message?.content
-            ?.find(c => c.type === 'text')?.text || '';
-
-          if (/(which|what|would you like|choose|select one|permission).*\?/i.test(lastAssistantText)) {
-            log('Detected answer to text question');
-            return 'answer-submit';
-          }
-        }
-      } catch (e) {
-        log(`Error reading transcript: ${e.message}`);
-      }
-    }
+    // Always use user-submit for all prompt submissions
     return 'user-submit';
   }
 
