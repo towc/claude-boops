@@ -17,11 +17,13 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 ## Features
 
 - 🎵 **6 Different Sounds** for different events (submit, question, permission, success, error, answer)
-- 🎨 **Interactive Visual Editor** with drag-to-edit interface
+- ⚡ **Dynamic Sound Generation** - sounds generated on-the-fly from config.json
+- 🎨 **Interactive Visual Editor** with drag-to-edit interface (optional)
 - 📊 **Logarithmic Frequency Control** for better precision
 - 🔒 **Directional Drag Locking** prevents accidental changes
 - 💾 **Auto-save** changes persist automatically
-- 🧠 **Smart Detection** different sounds for success vs error completions
+- 🎧 **Custom Sound Files** - optionally use your own audio files
+- 🧠 **Smart Detection** - different sounds for success vs error completions, skips redundant sounds
 
 ## Quick Start
 
@@ -50,22 +52,56 @@ git clone https://github.com/towc/claude-boops.git ~/.claude/boops
 
 Then restart Claude Code!
 
-The plugin includes pre-generated sound files, so it works immediately after installation. You can customize the sounds later (see Customizing Sounds section).
+The plugin works immediately after installation - sounds are generated dynamically from config.json. You can customize the sounds by editing config.json directly or using the visual editor (see Customizing Sounds section).
 
 ## Sounds
 
-| Event | Sound | Description |
-|-------|-------|-------------|
-| User Submit | `user-submit.wav` | When you press enter |
-| Answer Submit | `answer-submit.wav` | When you answer a question or grant permission |
-| Permission Needed | `permission-needed.wav` | When permission prompts appear |
-| Question | `question.wav` | Multiple choice questions |
-| Success | `completion-success.wav` | Normal completions |
-| Error | `completion-error.wav` | Errors/failures |
+| Event | Config ID | Description |
+|-------|-----------|-------------|
+| User Submit | `user-submit` | When you press enter |
+| Answer Submit | `answer-submit` | When you answer a question or grant permission |
+| Permission Needed | `permission-needed` | When permission prompts appear |
+| Question | `question` | Multiple choice questions |
+| Success | `completion-success` | Normal completions (skipped if a question was asked) |
+| Error | `completion-error` | Errors/failures |
 
 ## Customizing Sounds
 
-Edit your sounds with the visual interface:
+Sounds are generated dynamically from `config.json` - changes take effect immediately after restarting Claude Code!
+
+### Option 1: Edit config.json Directly
+
+Edit `config.json` in the plugin directory. Each sound has:
+- `tones`: Array of tone objects with `freq` (Hz), `duration` (seconds), `volume` (0-1), and `silent` (boolean)
+- `filepath` (optional): Path to a custom sound file to use instead of generating tones
+
+Example with custom file:
+```json
+{
+  "user-submit": {
+    "name": "User Submit",
+    "description": "When you press enter",
+    "filepath": "/path/to/my-sound.wav"
+  }
+}
+```
+
+Example with generated tones:
+```json
+{
+  "user-submit": {
+    "name": "User Submit",
+    "description": "When you press enter",
+    "tones": [
+      { "freq": 340, "duration": 0.09, "volume": 0.25, "silent": false }
+    ]
+  }
+}
+```
+
+### Option 2: Visual Editor (Optional)
+
+Use the interactive visual editor to design sounds:
 
 **If installed as a plugin:** Type `/settings` in Claude Code for instructions
 
@@ -75,14 +111,12 @@ This will:
 1. Start the sound server
 2. Open the editor in your browser
 
-### Using the Editor
-
+**Using the Editor:**
 - **Drag vertically** to change frequency (pitch) - uses logarithmic scale for better low-frequency control
 - **Drag horizontally** to change duration (length)
 - Direction automatically locks after initial movement
 - **Click/release** on a bar to preview the sound
-- **Changes auto-save** to config.json
-- Click **"Generate Sound Files"** to create WAV files from your config
+- **Changes auto-save** to config.json and take effect after restarting Claude Code
 
 The editor shows:
 - Grid lines for frequency (200, 500, 1000, 2000 Hz)
@@ -96,8 +130,7 @@ Share your `config.json` file with friends! It contains all the tone parameters 
 
 To use someone else's config:
 1. Copy their `config.json` to the plugin directory
-2. Run the settings script (see Customizing Sounds above)
-3. Click "Generate Sound Files"
+2. Restart Claude Code
 
 ## How It Works
 
@@ -105,17 +138,20 @@ Claude Boops uses [Claude Code's hooks system](https://docs.claude.com/en/docs/c
 
 - **UserPromptSubmit** - Detects if you're submitting a regular prompt or answering a question
 - **Notification** - Plays sound for permission prompts
-- **Stop** - Analyzes transcript to determine success vs error sounds
+- **Stop** - Analyzes transcript to determine success vs error sounds (skips if a question was just asked)
 - **PreToolUse** (AskUserQuestion) - Plays sound for multiple choice questions
 
-The bash scripts use `jq` to parse Claude's JSONL transcript format and intelligently select the appropriate sound.
+The `play-sound.js` script:
+1. Parses Claude's JSONL transcript format to intelligently select the appropriate sound
+2. Generates WAV data on-the-fly from config.json (or uses a custom file if specified)
+3. Plays the sound via `paplay` with exclusive playback (stops any currently playing sound)
+4. Automatically cleans up temporary files
 
 ## Requirements
 
 - [Claude Code](https://claude.com/claude-code) installed
-- Node.js (for sound generation)
-- `jq` (for JSON parsing in bash scripts)
-- A sound player: `paplay`, `aplay`, or similar
+- Node.js (for sound generation and playback logic)
+- A sound player: `paplay` (or `aplay`)
 
 ## File Structure
 

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/smart-submit.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/play-sound.js submit"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/smart-notification.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/play-sound.js notification"
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/smart-stop.sh"
+            "command": "${CLAUDE_PLUGIN_ROOT}/play-sound.js stop"
           }
         ]
       }
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/play-exclusive.sh ${CLAUDE_PLUGIN_ROOT}/question.wav"
+            "command": "${CLAUDE_PLUGIN_ROOT}/play-sound.js question"
           }
         ]
       }
