@@ -210,23 +210,41 @@ async function determineSound(hookType, hookData) {
           return null; // Don't play any sound
         }
 
-        // Check for error indicators - only at the START of the message (first 300 chars)
-        // and only for actual failure statements, not just mentions of problems
-        const messageStart = lastText.slice(0, 300).toLowerCase();
+        // Check for error indicators - very conservative
+        // Only actual failures at the start of message
+        const messageStart = lastText.slice(0, 400).toLowerCase();
         const hasActualError =
-          /^(i'm sorry,? (but )?i (couldn't|wasn't able|failed|can't))/i.test(messageStart) ||
-          /^unfortunately,? i (couldn't|wasn't able|failed|can't)/i.test(messageStart) ||
-          /the .{1,30} (failed|didn't work|couldn't be)/i.test(messageStart) ||
-          /\b(failed with|error:|fatal|exception|crashed)\b/i.test(messageStart);
+          /^i'?m sorry,?( but)? (i )?(couldn't|wasn't able to|failed to|can't)/i.test(messageStart) ||
+          /^unfortunately,? (i )?(couldn't|wasn't able to|failed to)/i.test(messageStart) ||
+          /^the .{1,40} (failed|couldn't be|didn't work)/i.test(messageStart) ||
+          /^error:/i.test(messageStart);
 
         if (hasActualError) {
           return 'completion-error';
+        }
+
+        // Check for explicit success indicators (extremely conservative)
+        // Only clear, significant task completions with explicit success language
+        const fullText = lastText.toLowerCase();
+        const hasExplicitSuccess =
+          // Explicit "successfully [action]" at start or with clear context
+          /\b(successfully (completed|installed|deployed|committed|pushed|built|fixed|created))\b/i.test(fullText) ||
+          // Git operations with explicit success
+          /\b(commit|push) (was )?successful/i.test(fullText) ||
+          // Build/test operations with explicit results
+          /\b(all tests? passed|build succeeded|tests? succeeded)\b/i.test(fullText) ||
+          // Deployment confirmations
+          /\b(deployment successful|successfully deployed)\b/i.test(fullText);
+
+        if (hasExplicitSuccess) {
+          return 'completion-success';
         }
       } catch (e) {
         log(`Error reading transcript: ${e.message}`);
       }
     }
-    return 'completion-success';
+    // Default to neutral completion sound
+    return 'completion-normal';
   }
 
   return null;

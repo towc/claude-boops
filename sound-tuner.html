@@ -137,6 +137,13 @@
             margin: 10px 0;
             flex-wrap: wrap;
         }
+        .preset-radio:has(input:checked) {
+            background: #0099ff22 !important;
+            border-color: #0099ff !important;
+        }
+        .preset-radio:hover {
+            border-color: #0099ff;
+        }
     </style>
 </head>
 <body>
@@ -147,11 +154,69 @@
         <span id="status-text" style="margin-left: 10px; font-weight: 500;">Checking connection...</span>
     </div>
 
-    <p style="color: #888; margin-bottom: 20px;">
-        <strong>Interactive visualization:</strong> Drag up/down to change frequency (snaps to musical semitones), left/right to change duration.<br>
-        <strong>Keyboard controls:</strong> Hover over a tone and use arrow keys - Up/Down for semitones, Left/Right for duration (±10ms).<br>
-        Click or release to play. Changes save automatically.
-    </p>
+    <div style="background: #222; padding: 16px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <label style="font-weight: bold; color: #0099ff;">Sound Preset</label>
+            <button id="save-preset-btn" style="padding: 6px 12px; background: #ff9500; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">💾 Save as Preset</button>
+        </div>
+        <div id="preset-buttons-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px;">
+            <!-- Preset buttons will be dynamically generated here -->
+        </div>
+        <div style="padding: 10px; background: #1a1a1a; border-radius: 4px; font-size: 12px; color: #888;" id="preset-description">
+            Select a preset to try different sound themes. Edit any sound to switch to Custom mode.
+        </div>
+    </div>
+
+    <div style="background: #222; padding: 16px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <label style="font-weight: bold; color: #0099ff;">Simulator</label>
+            <button id="simulate-btn" style="padding: 8px 16px; background: #0099ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">▶ Play Demo</button>
+        </div>
+        <div id="simulator-output" style="background: #0d0d0d; border: 1px solid #333; border-radius: 4px; padding: 12px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.8; height: 300px; overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 170px 1fr; gap: 12px;">
+                <div></div>
+                <div style="color: #777; font-style: italic;">Click "Play Demo" to simulate a Claude Code conversation and hear the sounds in context.</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; font-size: 13px;">
+        <div style="background: #222; padding: 12px; border-radius: 6px; border: 1px solid #333;">
+            <div style="font-size: 20px; margin-bottom: 6px;">🖱️</div>
+            <div style="color: #0099ff; font-weight: bold; margin-bottom: 4px;">Mouse</div>
+            <div style="color: #888; font-size: 12px;">Drag ↕️ frequency<br>Drag ↔️ duration<br>⇧+Drag ↔️ start time<br>Click twice = cycle<br>overlap</div>
+        </div>
+        <div style="background: #222; padding: 12px; border-radius: 6px; border: 1px solid #333;">
+            <div style="font-size: 20px; margin-bottom: 6px;">⌨️</div>
+            <div style="color: #0099ff; font-weight: bold; margin-bottom: 4px;">Arrows</div>
+            <div style="color: #888; font-size: 12px;">↑↓ semitones<br>←→ duration<br>⏎ play</div>
+        </div>
+        <div style="background: #222; padding: 12px; border-radius: 6px; border: 1px solid #333;">
+            <div style="font-size: 20px; margin-bottom: 6px;">⇥</div>
+            <div style="color: #0099ff; font-weight: bold; margin-bottom: 4px;">Navigation</div>
+            <div style="color: #888; font-size: 12px;">Tab next tone<br>⇧↑↓ next sound<br>⇧←→ next tone</div>
+        </div>
+        <div style="background: #222; padding: 12px; border-radius: 6px; border: 1px solid #333;">
+            <div style="font-size: 20px; margin-bottom: 6px;">✏️</div>
+            <div style="color: #0099ff; font-weight: bold; margin-bottom: 4px;">Edit</div>
+            <div style="color: #888; font-size: 12px;">⇧Space add tone<br>⌫ delete tone<br>Auto-save</div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; font-size: 12px; color: #888;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: white; border: 2px solid black;"></div>
+            <span>Natural note</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: black; border: 2px solid white;"></div>
+            <span>Sharp/flat</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="color: #00ddff; font-weight: bold;">+7</span>
+            <span>Semitones from 1st tone</span>
+        </div>
+    </div>
 
     <canvas id="main-canvas" width="1200" height="600" style="width: 100%; height: 600px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; margin-bottom: 20px; cursor: grab;"></canvas>
 
@@ -166,6 +231,7 @@
 
         let dragState = null; // { soundId, toneIdx, startX, startY, startFreq, startDuration, lockAxis }
         let hoverState = null; // { soundId, toneIdx }
+        let selectedState = null; // { soundId, toneIdx } - for keyboard navigation
 
         // Musical note utilities
         const A4_FREQ = 440; // A4 reference frequency
@@ -187,69 +253,99 @@
             return Math.round(semitoneToFreq(semitone));
         }
 
+        function isNaturalNote(freq) {
+            // Check if frequency is a natural note (white key) vs sharp/flat (black key)
+            const semitone = Math.round(freqToSemitone(freq));
+            const noteInOctave = ((semitone % 12) + 12) % 12; // Handle negative values
+            const naturalNotes = [0, 2, 4, 5, 7, 9, 11]; // C, D, E, F, G, A, B
+            return naturalNotes.includes(noteInOctave);
+        }
+
         const DEFAULT_SOUNDS = {
             'user-submit': {
                 name: 'User Submit',
                 description: 'When you press enter',
                 tones: [
-                    { freq: 500, duration: 0.06, volume: 0.3, silent: false },
-                    { freq: 600, duration: 0.06, volume: 0.3, silent: false }
-                ]
-            },
-            'answer-submit': {
-                name: 'Answer Submit',
-                description: 'When you answer a question or grant permission',
-                tones: [
-                    { freq: 600, duration: 0.05, volume: 0.3, silent: false },
-                    { freq: 750, duration: 0.05, volume: 0.3, silent: false },
-                    { freq: 850, duration: 0.06, volume: 0.3, silent: false }
+                    { freq: 500, start: 0, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 600, start: 0.06, duration: 0.06, volume: 0.3, silent: false }
                 ]
             },
             'permission-needed': {
                 name: 'Permission Needed',
                 description: 'Permission prompts',
                 tones: [
-                    { freq: 650, duration: 0.06, volume: 0.3, silent: false },
-                    { freq: 750, duration: 0.06, volume: 0.3, silent: false },
-                    { freq: 650, duration: 0.08, volume: 0.3, silent: false }
+                    { freq: 650, start: 0, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 750, start: 0.06, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 650, start: 0.12, duration: 0.08, volume: 0.3, silent: false }
                 ]
             },
             'question': {
                 name: 'Question',
                 description: 'Multiple choice questions',
                 tones: [
-                    { freq: 800, duration: 0.08, volume: 0.3, silent: false },
-                    { freq: 950, duration: 0.08, volume: 0.3, silent: false }
+                    { freq: 800, start: 0, duration: 0.08, volume: 0.3, silent: false },
+                    { freq: 950, start: 0.08, duration: 0.08, volume: 0.3, silent: false }
+                ]
+            },
+            'completion-normal': {
+                name: 'Completion Normal',
+                description: 'Regular completions (neutral)',
+                tones: [
+                    { freq: 440, start: 0, duration: 0.12, volume: 0.25, silent: false }
                 ]
             },
             'completion-success': {
                 name: 'Completion Success',
-                description: 'Normal completions',
+                description: 'Successful completions only',
                 tones: [
-                    { freq: 500, duration: 0.07, volume: 0.3, silent: false },
-                    { freq: 650, duration: 0.07, volume: 0.3, silent: false },
-                    { freq: 800, duration: 0.1, volume: 0.3, silent: false }
+                    { freq: 500, start: 0, duration: 0.07, volume: 0.3, silent: false },
+                    { freq: 650, start: 0.07, duration: 0.07, volume: 0.3, silent: false },
+                    { freq: 800, start: 0.14, duration: 0.1, volume: 0.3, silent: false }
                 ]
             },
             'completion-error': {
                 name: 'Completion Error',
                 description: 'Errors/failures',
                 tones: [
-                    { freq: 700, duration: 0.06, volume: 0.3, silent: false },
-                    { freq: 500, duration: 0.08, volume: 0.3, silent: false },
-                    { freq: 400, duration: 0.1, volume: 0.3, silent: false }
+                    { freq: 220, start: 0, duration: 0.35, volume: 0.3, silent: false },
+                    { freq: 233, start: 0, duration: 0.35, volume: 0.3, silent: false }
                 ]
             }
         };
 
         // Load from server or use defaults
+        let fullConfig = {}; // Stores the full config including _presets
+        let presets = {};
+
         async function loadSoundsConfig() {
             try {
                 const response = await fetch('http://localhost:8765/config');
                 if (response.ok) {
                     const config = await response.json();
                     console.log('✓ Loaded config from ~/.claude/sounds/config.json');
-                    return config;
+
+                    // Store full config including presets
+                    fullConfig = config;
+                    presets = config._presets || {};
+
+                    // Extract just the sound definitions (not _presets)
+                    const sounds = {};
+                    for (const soundId in config) {
+                        if (!soundId.startsWith('_')) {
+                            sounds[soundId] = config[soundId];
+
+                            // Migrate old format: add 'start' field if missing
+                            let currentStart = 0;
+                            for (const tone of sounds[soundId].tones) {
+                                if (tone.start === undefined) {
+                                    tone.start = currentStart;
+                                    currentStart += tone.duration;
+                                }
+                            }
+                        }
+                    }
+
+                    return sounds;
                 }
             } catch (e) {
                 console.log('No saved config, using defaults');
@@ -259,10 +355,16 @@
 
         async function saveSoundsConfig() {
             try {
+                // Combine sounds with presets for saving
+                const configToSave = {
+                    ...fullConfig,
+                    ...soundsConfig
+                };
+
                 const response = await fetch('http://localhost:8765/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(soundsConfig),
+                    body: JSON.stringify(configToSave),
                     signal: AbortSignal.timeout(2000)
                 });
                 if (response.ok) {
@@ -274,19 +376,112 @@
             }
         }
 
+        let currentPreset = 'conversational'; // Track current preset
+        let customSounds = null; // Store custom sounds when switching away
+
+        function loadPreset(presetName, skipSave = false) {
+            if (presetName === 'custom') {
+                const desc = document.getElementById('preset-description');
+                desc.textContent = 'Your custom sound design - edit any preset to create your own.';
+
+                // Restore saved custom sounds if they exist
+                if (customSounds) {
+                    for (const soundId in customSounds) {
+                        if (soundsConfig[soundId]) {
+                            soundsConfig[soundId].tones = JSON.parse(JSON.stringify(customSounds[soundId].tones));
+                        }
+                    }
+                    currentPreset = 'custom';
+                    drawCanvas();
+                    if (!skipSave) {
+                        saveSoundsConfig();
+                    }
+                }
+                return;
+            }
+
+            // Save current custom sounds before switching to a preset
+            if (currentPreset === 'custom') {
+                customSounds = {};
+                for (const soundId in soundsConfig) {
+                    customSounds[soundId] = {
+                        name: soundsConfig[soundId].name,
+                        description: soundsConfig[soundId].description,
+                        tones: JSON.parse(JSON.stringify(soundsConfig[soundId].tones))
+                    };
+                }
+            }
+
+            const preset = presets[presetName];
+            if (!preset) {
+                console.error('Preset not found:', presetName);
+                return;
+            }
+
+            currentPreset = presetName;
+
+            // Load preset sounds into soundsConfig
+            for (const soundId in preset.sounds) {
+                if (soundsConfig[soundId]) {
+                    soundsConfig[soundId].tones = JSON.parse(JSON.stringify(preset.sounds[soundId].tones));
+                }
+            }
+
+            // Update description
+            const desc = document.getElementById('preset-description');
+            desc.textContent = preset.description;
+
+            // Save and re-render
+            if (!skipSave) {
+                saveSoundsConfig();
+            }
+            drawCanvas();
+        }
+
+        function switchToCustom() {
+            if (currentPreset !== 'custom') {
+                // Save current state as custom
+                customSounds = {};
+                for (const soundId in soundsConfig) {
+                    customSounds[soundId] = {
+                        name: soundsConfig[soundId].name,
+                        description: soundsConfig[soundId].description,
+                        tones: JSON.parse(JSON.stringify(soundsConfig[soundId].tones))
+                    };
+                }
+
+                currentPreset = 'custom';
+                const customRadio = document.querySelector('input[name="preset"][value="custom"]');
+                if (customRadio) {
+                    customRadio.checked = true;
+                }
+                const desc = document.getElementById('preset-description');
+                desc.textContent = 'Your custom sound design - edit any preset to create your own.';
+            }
+        }
+
         let soundsConfig = JSON.parse(JSON.stringify(DEFAULT_SOUNDS));
 
         function playSound(soundId) {
+            // Don't play if already playing
+            if (isPlaying) {
+                return;
+            }
+
             const config = soundsConfig[soundId];
             const now = audioContext.currentTime;
-            let startTime = now;
+
+            // Calculate total duration (max end time)
+            const totalDuration = Math.max(...config.tones.map(t => t.start + t.duration));
+
+            // Mark as playing
+            isPlaying = true;
+            clearTimeout(playingSoundTimeout);
+            playingSoundTimeout = setTimeout(() => {
+                isPlaying = false;
+            }, totalDuration * 1000 + 50); // Add 50ms buffer
 
             config.tones.forEach((tone, idx) => {
-                if (tone.silent) {
-                    startTime += tone.duration;
-                    return;
-                }
-
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
 
@@ -296,27 +491,26 @@
                 oscillator.frequency.value = tone.freq;
                 oscillator.type = 'sine';
 
+                const toneStart = now + tone.start;
                 const fadeTime = Math.min(tone.duration * 0.1, 0.01);
-                gainNode.gain.setValueAtTime(0, startTime);
-                gainNode.gain.linearRampToValueAtTime(tone.volume, startTime + fadeTime);
-                gainNode.gain.setValueAtTime(tone.volume, startTime + tone.duration - fadeTime);
-                gainNode.gain.linearRampToValueAtTime(0, startTime + tone.duration);
+                gainNode.gain.setValueAtTime(0, toneStart);
+                gainNode.gain.linearRampToValueAtTime(tone.volume, toneStart + fadeTime);
+                gainNode.gain.setValueAtTime(tone.volume, toneStart + tone.duration - fadeTime);
+                gainNode.gain.linearRampToValueAtTime(0, toneStart + tone.duration);
 
-                oscillator.start(startTime);
-                oscillator.stop(startTime + tone.duration);
-
-                startTime += tone.duration;
+                oscillator.start(toneStart);
+                oscillator.stop(toneStart + tone.duration);
             });
         }
 
         let saveTimeout = null;
+        let playSoundTimeout = null;
+        let isPlaying = false;
+        let playingSoundTimeout = null;
 
         function updateValue(soundId, toneIdx, param, value) {
-            if (param === 'silent') {
-                soundsConfig[soundId].tones[toneIdx][param] = value;
-            } else {
-                soundsConfig[soundId].tones[toneIdx][param] = parseFloat(value);
-            }
+            soundsConfig[soundId].tones[toneIdx][param] = parseFloat(value);
+            switchToCustom(); // User edited manually
             saveSoundsConfig(); // Save to localStorage
             drawMainCanvas(); // Redraw canvas immediately
 
@@ -328,7 +522,10 @@
         }
 
         function addTone(soundId) {
-            soundsConfig[soundId].tones.push({ freq: 500, duration: 0.1, volume: 0.3, silent: false });
+            const tones = soundsConfig[soundId].tones;
+            // Add new tone after the last tone ends
+            const maxEnd = tones.length > 0 ? Math.max(...tones.map(t => t.start + t.duration)) : 0;
+            tones.push({ freq: 500, start: maxEnd, duration: 0.1, volume: 0.3, silent: false });
             renderSounds();
             saveToServer();
         }
@@ -466,8 +663,10 @@
                 ctx.font = 'bold 13px sans-serif';
                 ctx.fillText(config.name, padding, yStart + soundHeight / 2 + 5);
 
-                // Calculate total duration
-                const totalDuration = config.tones.reduce((sum, tone) => sum + tone.duration, 0);
+                // Calculate total duration (max end time)
+                const totalDuration = config.tones.length > 0
+                    ? Math.max(...config.tones.map(t => t.start + t.duration))
+                    : 0.5;
                 const availableWidth = width - labelWidth - padding * 3;
                 const pixelsPerSecond = availableWidth / Math.max(totalDuration, 0.5);
 
@@ -508,80 +707,116 @@
                     ctx.fillText(`${Math.round(t * 1000)}`, x - 8, yStart + padding + 8);
                 }
 
-                let currentX = graphStart;
-
                 config.tones.forEach((tone, toneIdx) => {
                     const toneWidth = tone.duration * pixelsPerSecond;
+                    const toneX = graphStart + (tone.start * pixelsPerSecond);
                     const isHovered = hoverState && hoverState.soundId === soundId && hoverState.toneIdx === toneIdx;
 
-                    if (tone.silent) {
-                        // Draw silent section
-                        const silentY = yStart + padding;
-                        const silentHeight = soundHeight - padding * 2;
+                    // Map frequency to height (logarithmic)
+                    // Draw a horizontal line at the frequency level
+                    const freqY = freqToY(tone.freq, yStart);
 
-                        ctx.fillStyle = isHovered ? '#1a1a1a' : '#0a0a0a';
-                        ctx.fillRect(currentX + 1, silentY, toneWidth - 2, silentHeight);
+                    // Map frequency to color
+                    const freqNormalized = (Math.log(tone.freq) - logMin) / (logMax - logMin);
+                    const hue = 200 + (freqNormalized * 80);
 
-                        ctx.strokeStyle = isHovered ? '#555' : '#1a1a1a';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([3, 3]);
-                        ctx.strokeRect(currentX + 1, silentY, toneWidth - 2, silentHeight);
-                        ctx.setLineDash([]);
+                    // Draw filled area from frequency line to a fixed baseline
+                    const baselineHeight = 12;
+                    const barTop = freqY - baselineHeight / 2;
+                    const barBottom = freqY + baselineHeight / 2;
 
-                        ctx.fillStyle = '#555';
-                        ctx.font = '9px sans-serif';
-                        ctx.fillText('silent', currentX + 5, yStart + soundHeight / 2 + 3);
+                    // Draw the frequency indicator bar
+                    const gradient = ctx.createLinearGradient(0, barTop, 0, barBottom);
+                    if (isHovered) {
+                        gradient.addColorStop(0, `hsl(${hue}, 80%, 65%)`);
+                        gradient.addColorStop(0.5, `hsl(${hue}, 90%, 70%)`);
+                        gradient.addColorStop(1, `hsl(${hue}, 80%, 65%)`);
                     } else {
-                        // Map frequency to height (logarithmic)
-                        // Draw a horizontal line at the frequency level
-                        const freqY = freqToY(tone.freq, yStart);
-
-                        // Map frequency to color
-                        const freqNormalized = (Math.log(tone.freq) - logMin) / (logMax - logMin);
-                        const hue = 200 + (freqNormalized * 80);
-
-                        // Draw filled area from frequency line to a fixed baseline
-                        const baselineHeight = 12;
-                        const barTop = freqY - baselineHeight / 2;
-                        const barBottom = freqY + baselineHeight / 2;
-
-                        // Draw the frequency indicator bar
-                        const gradient = ctx.createLinearGradient(0, barTop, 0, barBottom);
-                        if (isHovered) {
-                            gradient.addColorStop(0, `hsl(${hue}, 80%, 65%)`);
-                            gradient.addColorStop(0.5, `hsl(${hue}, 90%, 70%)`);
-                            gradient.addColorStop(1, `hsl(${hue}, 80%, 65%)`);
-                        } else {
-                            gradient.addColorStop(0, `hsl(${hue}, 70%, 45%)`);
-                            gradient.addColorStop(0.5, `hsl(${hue}, 80%, 55%)`);
-                            gradient.addColorStop(1, `hsl(${hue}, 70%, 45%)`);
-                        }
-
-                        ctx.fillStyle = gradient;
-                        ctx.fillRect(currentX + 1, barTop, toneWidth - 2, baselineHeight);
-
-                        // Draw border
-                        ctx.strokeStyle = isHovered ? '#0099ff' : `hsl(${hue}, 60%, 30%)`;
-                        ctx.lineWidth = isHovered ? 2 : 1;
-                        ctx.strokeRect(currentX + 1, barTop, toneWidth - 2, baselineHeight);
-
-                        // Draw labels (only if space)
-                        if (toneWidth > 40) {
-                            // Frequency above the bar
-                            ctx.fillStyle = '#fff';
-                            ctx.font = 'bold 11px monospace';
-                            ctx.textAlign = 'center';
-                            ctx.fillText(`${tone.freq}Hz`, currentX + toneWidth / 2, barTop - 4);
-
-                            // Duration below the bar
-                            ctx.fillStyle = '#999';
-                            ctx.font = '9px monospace';
-                            ctx.fillText(`${(tone.duration * 1000).toFixed(0)}ms`, currentX + toneWidth / 2, barBottom + 12);
-                            ctx.textAlign = 'left';
-                        }
+                        gradient.addColorStop(0, `hsl(${hue}, 70%, 45%)`);
+                        gradient.addColorStop(0.5, `hsl(${hue}, 80%, 55%)`);
+                        gradient.addColorStop(1, `hsl(${hue}, 70%, 45%)`);
                     }
 
-                    currentX += toneWidth;
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(toneX + 1, barTop, toneWidth - 2, baselineHeight);
+
+                    // Draw border
+                    ctx.strokeStyle = isHovered ? '#0099ff' : `hsl(${hue}, 60%, 30%)`;
+                    ctx.lineWidth = isHovered ? 2 : 1;
+                    ctx.strokeRect(toneX + 1, barTop, toneWidth - 2, baselineHeight);
+
+                    // Calculate interval from first tone (needed for positioning)
+                    let intervalText = '';
+                    if (toneIdx > 0) {
+                        const firstTone = config.tones[0];
+                        const firstSemitone = Math.round(freqToSemitone(firstTone.freq));
+                        const currentSemitone = Math.round(freqToSemitone(tone.freq));
+                        const interval = currentSemitone - firstSemitone;
+                        intervalText = `${interval >= 0 ? '+' : ''}${interval}`;
+                    }
+
+                    // Draw note type indicator (natural vs sharp/flat)
+                    const isNatural = isNaturalNote(tone.freq);
+                    const indicatorX = toneX + 8;
+                    const indicatorY = freqY;
+                    const indicatorRadius = 3;
+
+                    ctx.beginPath();
+                    ctx.arc(indicatorX, indicatorY, indicatorRadius, 0, Math.PI * 2);
+                    if (isNatural) {
+                        // Natural note: white circle with border
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    } else {
+                        // Sharp/flat: filled black circle
+                        ctx.fillStyle = '#000000';
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+
+                    // Draw interval above the dot indicator
+                    if (intervalText && toneWidth > 40) {
+                        ctx.fillStyle = '#00ddff';
+                        ctx.font = 'bold 14px monospace';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(`${intervalText}`, indicatorX + 6, indicatorY - 8);
+                    }
+
+                    // Draw labels (only if space)
+                    if (toneWidth > 40) {
+                        ctx.textAlign = 'center';
+
+                        // Frequency above the bar
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 13px monospace';
+                        ctx.fillText(`${tone.freq}Hz`, toneX + toneWidth / 2, barTop - 8);
+
+                        // Duration below the bar
+                        ctx.fillStyle = '#bbbbbb';
+                        ctx.font = 'bold 10px monospace';
+                        ctx.fillText(`${(tone.duration * 1000).toFixed(0)}ms`, toneX + toneWidth / 2, barBottom + 14);
+                        ctx.textAlign = 'left';
+                    }
+
+                    // Show stacking indicator if multiple tones overlap
+                    const overlapping = config.tones.filter((t, i) => {
+                        return i !== toneIdx &&
+                               t.start < tone.start + tone.duration &&
+                               t.start + t.duration > tone.start;
+                    }).length;
+
+                    if (overlapping > 0 && toneWidth > 20) {
+                        ctx.fillStyle = '#ff9500';
+                        ctx.font = 'bold 10px monospace';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(`×${overlapping + 1}`, toneX + toneWidth - 4, barTop + 10);
+                        ctx.textAlign = 'left';
+                    }
                 });
 
                 // Draw separator line
@@ -596,7 +831,7 @@
             });
         }
 
-        function getToneAtPosition(x, y) {
+        function getToneAtPosition(x, y, preferredIdx = null) {
             const canvas = document.getElementById('main-canvas');
             const soundIds = Object.keys(soundsConfig);
             const soundHeight = canvas.height / soundIds.length;
@@ -608,21 +843,69 @@
 
             const soundId = soundIds[soundIdx];
             const config = soundsConfig[soundId];
-            const totalDuration = config.tones.reduce((sum, tone) => sum + tone.duration, 0);
+            const totalDuration = config.tones.length > 0
+                ? Math.max(...config.tones.map(t => t.start + t.duration))
+                : 0.5;
             const availableWidth = canvas.width - labelWidth - padding * 3;
             const pixelsPerSecond = availableWidth / Math.max(totalDuration, 0.5);
 
-            let currentX = labelWidth + padding * 2;
+            const graphStart = labelWidth + padding * 2;
+            const yStart = soundIdx * soundHeight;
+
+            // Logarithmic scale for frequency (same as in drawCanvas)
+            const minFreq = 200;
+            const maxFreq = 2000;
+            const logMin = Math.log(minFreq);
+            const logMax = Math.log(maxFreq);
+            const freqToY = (freq) => {
+                const logFreq = Math.log(freq);
+                const normalized = (logFreq - logMin) / (logMax - logMin);
+                return yStart + soundHeight - padding - (normalized * (soundHeight - padding * 2));
+            };
+
+            // Find all tones at this horizontal position and calculate distances
+            const matchingTones = [];
+            const baselineHeight = 12; // Same as in drawCanvas
             for (let toneIdx = 0; toneIdx < config.tones.length; toneIdx++) {
                 const tone = config.tones[toneIdx];
                 const toneWidth = tone.duration * pixelsPerSecond;
+                const toneX = graphStart + (tone.start * pixelsPerSecond);
 
-                if (x >= currentX && x < currentX + toneWidth) {
-                    return { soundId, toneIdx, pixelsPerSecond, soundHeight };
+                if (x >= toneX && x < toneX + toneWidth) {
+                    // Calculate distance from mouse to tone's rectangular bar
+                    const toneFreqY = freqToY(tone.freq);
+                    const barTop = toneFreqY - baselineHeight / 2;
+                    const barBottom = toneFreqY + baselineHeight / 2;
+
+                    // Distance from point to rectangle
+                    const dx = Math.max(toneX - x, 0, x - (toneX + toneWidth));
+                    const dy = Math.max(barTop - y, 0, y - barBottom);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    matchingTones.push({ toneIdx, distance });
                 }
-                currentX += toneWidth;
             }
-            return null;
+
+            if (matchingTones.length === 0) return null;
+
+            // Sort by distance (closest first)
+            matchingTones.sort((a, b) => a.distance - b.distance);
+
+            const allMatchIndices = matchingTones.map(m => m.toneIdx);
+            const closestToneIdx = matchingTones[0].toneIdx;
+
+            // If there's a preferred index in the matches and it's reasonably close, use it
+            // (within 20% of the closest distance to avoid jumping too much)
+            if (preferredIdx !== null && allMatchIndices.includes(preferredIdx)) {
+                const preferredMatch = matchingTones.find(m => m.toneIdx === preferredIdx);
+                const closestDistance = matchingTones[0].distance;
+                if (preferredMatch.distance <= closestDistance * 1.2) {
+                    return { soundId, toneIdx: preferredIdx, pixelsPerSecond, soundHeight, allMatches: allMatchIndices };
+                }
+            }
+
+            // Otherwise return the closest tone
+            return { soundId, toneIdx: closestToneIdx, pixelsPerSecond, soundHeight, allMatches: allMatchIndices };
         }
 
         async function saveToServer() {
@@ -678,25 +961,323 @@
         // Check connection periodically
         setInterval(checkConnection, 5000);
 
+        // Generate preset buttons dynamically from config
+        function generatePresetButtons() {
+            const container = document.getElementById('preset-buttons-container');
+            container.innerHTML = '';
+
+            // Add preset buttons from the presets object
+            for (const presetId in presets) {
+                const preset = presets[presetId];
+                const label = document.createElement('label');
+                label.className = 'preset-radio';
+                label.style.cssText = 'display: flex; align-items: center; padding: 10px; background: #1a1a1a; border: 1px solid #555; border-radius: 4px; cursor: pointer; transition: all 0.2s;';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'preset';
+                radio.value = presetId;
+                radio.style.cssText = 'margin-right: 8px; cursor: pointer;';
+
+                const span = document.createElement('span');
+                span.style.fontSize = '14px';
+                span.textContent = preset.name;
+
+                label.appendChild(radio);
+                label.appendChild(span);
+                container.appendChild(label);
+
+                // Add event listener
+                radio.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        loadPreset(e.target.value);
+                    }
+                });
+            }
+
+            // Add "Custom" button last
+            const customLabel = document.createElement('label');
+            customLabel.className = 'preset-radio';
+            customLabel.style.cssText = 'display: flex; align-items: center; padding: 10px; background: #1a1a1a; border: 1px solid #555; border-radius: 4px; cursor: pointer; transition: all 0.2s;';
+
+            const customRadio = document.createElement('input');
+            customRadio.type = 'radio';
+            customRadio.name = 'preset';
+            customRadio.value = 'custom';
+            customRadio.style.cssText = 'margin-right: 8px; cursor: pointer;';
+
+            const customSpan = document.createElement('span');
+            customSpan.style.fontSize = '14px';
+            customSpan.textContent = 'Custom';
+
+            customLabel.appendChild(customRadio);
+            customLabel.appendChild(customSpan);
+            container.appendChild(customLabel);
+
+            // Add event listener for custom
+            customRadio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    loadPreset('custom');
+                }
+            });
+        }
+
+        // Save current configuration as a preset
+        async function saveAsPreset() {
+            // Prompt for preset name
+            const presetId = prompt('Enter a preset ID (lowercase, no spaces, e.g., "my-preset"):');
+            if (!presetId) return;
+
+            // Validate preset ID
+            if (!/^[a-z0-9-]+$/.test(presetId)) {
+                alert('Preset ID must be lowercase letters, numbers, and hyphens only.');
+                return;
+            }
+
+            if (presets[presetId]) {
+                if (!confirm(`Preset "${presetId}" already exists. Overwrite it?`)) {
+                    return;
+                }
+            }
+
+            const presetName = prompt('Enter a display name for this preset:', presetId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
+            if (!presetName) return;
+
+            const presetDescription = prompt('Enter a description for this preset:', 'Custom sound theme');
+            if (!presetDescription) return;
+
+            // Create the preset from current soundsConfig
+            const newPreset = {
+                name: presetName,
+                description: presetDescription,
+                sounds: {}
+            };
+
+            // Copy all sound configurations
+            for (const soundId in soundsConfig) {
+                newPreset.sounds[soundId] = {
+                    tones: JSON.parse(JSON.stringify(soundsConfig[soundId].tones))
+                };
+            }
+
+            // Add to presets
+            presets[presetId] = newPreset;
+            fullConfig._presets = presets;
+
+            // Save to server
+            try {
+                const response = await fetch('http://localhost:8765/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fullConfig),
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (response.ok) {
+                    alert(`Preset "${presetName}" saved successfully!`);
+
+                    // Regenerate buttons
+                    generatePresetButtons();
+
+                    // Select the new preset
+                    currentPreset = presetId;
+                    const newRadio = document.querySelector(`input[name="preset"][value="${presetId}"]`);
+                    if (newRadio) {
+                        newRadio.checked = true;
+                    }
+                    const desc = document.getElementById('preset-description');
+                    desc.textContent = presetDescription;
+                } else {
+                    alert('Failed to save preset. Server error.');
+                }
+            } catch (error) {
+                alert('Failed to save preset. Make sure the server is running.');
+                console.error('Save preset error:', error);
+            }
+        }
+
+        document.getElementById('save-preset-btn').addEventListener('click', saveAsPreset);
+
+        // Simulator
+        let simulatorRunning = false;
+        let stopSimulator = false;
+
+        async function runSimulator() {
+            if (simulatorRunning) {
+                // Stop the simulator
+                stopSimulator = true;
+                return;
+            }
+
+            simulatorRunning = true;
+            stopSimulator = false;
+
+            const output = document.getElementById('simulator-output');
+            const btn = document.getElementById('simulate-btn');
+            btn.textContent = '⏹ Stop Demo';
+            btn.style.background = '#cc0044';
+
+            output.innerHTML = '';
+
+            const steps = [
+                { delay: 500, html: '<div style="color: #aaddff; background: #1a2633; padding: 6px 10px; margin-bottom: 4px; border-radius: 3px; border-left: 3px solid #0099ff;"><span style="color: #0099ff; font-weight: bold;">&gt;</span> Ready to work?</div>', sound: 'user-submit', soundLabel: 'User Submit' },
+                { delay: 800, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is thinking...</div>', sound: null },
+                { delay: 600, html: '<div style="color: #cccccc; margin-bottom: 8px;">Let\'s do it! What would you like to work on?</div>', sound: 'completion-normal', soundLabel: 'Completion Normal' },
+                { delay: 1200, html: '<div style="color: #aaddff; background: #1a2633; padding: 6px 10px; margin-bottom: 4px; border-radius: 3px; border-left: 3px solid #0099ff;"><span style="color: #0099ff; font-weight: bold;">&gt;</span> Can you add tests to my project?</div>', sound: 'user-submit', soundLabel: 'User Submit' },
+                { delay: 1000, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is thinking...</div>', sound: null },
+                { delay: 900, html: '<div style="color: #ffcc66; margin-bottom: 4px;">Which testing framework would you like to use?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;">○ Jest<br>○ Vitest<br>○ Mocha</div>', sound: 'question', soundLabel: 'Question' },
+                { delay: 1400, html: '<div style="color: #ffcc66; margin-bottom: 4px;">Which testing framework would you like to use?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;"><span style="background: #0099ff; color: #fff; padding: 2px 6px; border-radius: 2px;">● Jest</span><br>○ Vitest<br>○ Mocha</div>', sound: null, updateLast: true },
+                { delay: 900, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is working...</div>', sound: null },
+                { delay: 1100, html: '<div style="color: #ff8888; margin-bottom: 10px;">✗ Error: jest is not installed. Please run npm install jest first.</div>', sound: 'completion-error', soundLabel: 'Completion Error' },
+                { delay: 1500, html: '<div style="color: #aaddff; background: #1a2633; padding: 6px 10px; margin-bottom: 4px; border-radius: 3px; border-left: 3px solid #0099ff;"><span style="color: #0099ff; font-weight: bold;">&gt;</span> ok, install it for me</div>', sound: 'user-submit', soundLabel: 'User Submit' },
+                { delay: 800, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is working...</div>', sound: null },
+                { delay: 600, html: '<div style="color: #ff9944; margin-bottom: 4px;">⚠️ Permission needed: Run npm install?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;">[ Allow ] [ Deny ] [ Allow All ]</div>', sound: 'permission-needed', soundLabel: 'Permission Needed' },
+                { delay: 800, html: '<div style="color: #ff9944; margin-bottom: 4px;">⚠️ Permission needed: Run npm install?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;"><span style="background: #44cc44; color: #000; padding: 4px 10px; border-radius: 3px; font-weight: bold;">[ Allow ]</span> [ Deny ] [ Allow All ]</div>', sound: null, updateLast: true },
+                { delay: 1000, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Installing dependencies...</div>', sound: null },
+                { delay: 1200, html: '<div style="color: #88dd88; margin-bottom: 10px;">✓ Successfully installed jest and created test files</div>', sound: 'completion-success', soundLabel: 'Completion Success' },
+                { delay: 1500, html: '<div style="color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #222;"><br>Demo complete! Try different presets to hear the differences.</div>', sound: null }
+            ];
+
+            for (const step of steps) {
+                if (stopSimulator) {
+                    const stoppedMsg = document.createElement('div');
+                    stoppedMsg.innerHTML = '<div style="color: #ff9500; margin-top: 12px;">Demo stopped.</div>';
+                    output.appendChild(stoppedMsg);
+                    break;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, step.delay));
+
+                if (stopSimulator) {
+                    const stoppedMsg = document.createElement('div');
+                    stoppedMsg.innerHTML = '<div style="color: #ff9500; margin-top: 12px;">Demo stopped.</div>';
+                    output.appendChild(stoppedMsg);
+                    break;
+                }
+
+                if (step.updateLast) {
+                    // Update the last row instead of creating a new one
+                    const lastRow = output.lastElementChild;
+                    if (lastRow && lastRow.children.length >= 2) {
+                        // The second child (index 1) is the message column
+                        const messageColumn = lastRow.children[1];
+                        if (messageColumn) {
+                            messageColumn.innerHTML = step.html;
+                        }
+                    }
+                } else {
+                    // Create row container with two columns
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display: grid; grid-template-columns: 170px 1fr; gap: 12px; align-items: start;';
+
+                    // Left column: sound label (or empty space)
+                    const soundColumn = document.createElement('div');
+                    soundColumn.style.cssText = 'text-align: right; padding-right: 8px;';
+
+                    if (step.sound) {
+                        const soundIndicator = document.createElement('div');
+                        soundIndicator.style.cssText = 'color: #ff9500; font-size: 10px; padding: 4px 8px; background: #ff950022; border-right: 2px solid #ff9500; display: inline-block; border-radius: 3px; cursor: pointer; transition: all 0.2s;';
+                        soundIndicator.innerHTML = `🔊 ${step.soundLabel}`;
+                        soundIndicator.title = 'Click to replay this sound';
+
+                        // Capture the sound ID in a closure
+                        const soundId = step.sound;
+                        soundIndicator.addEventListener('click', () => {
+                            playSound(soundId);
+                        });
+                        soundIndicator.addEventListener('mouseenter', () => {
+                            soundIndicator.style.background = '#ff950044';
+                            soundIndicator.style.borderRightWidth = '3px';
+                        });
+                        soundIndicator.addEventListener('mouseleave', () => {
+                            soundIndicator.style.background = '#ff950022';
+                            soundIndicator.style.borderRightWidth = '2px';
+                        });
+
+                        soundColumn.appendChild(soundIndicator);
+                        playSound(step.sound);
+                    }
+
+                    // Right column: message content
+                    const messageColumn = document.createElement('div');
+                    messageColumn.innerHTML = step.html;
+
+                    row.appendChild(soundColumn);
+                    row.appendChild(messageColumn);
+                    output.appendChild(row);
+                }
+
+                output.scrollTop = output.scrollHeight;
+            }
+
+            simulatorRunning = false;
+            btn.textContent = '▶ Play Demo';
+            btn.style.background = '#0099ff';
+        }
+
+        document.getElementById('simulate-btn').addEventListener('click', runSimulator);
+
         // Initial render - load config then render
         (async () => {
             await checkConnection();
             soundsConfig = await loadSoundsConfig();
+
+            // Generate preset buttons after config is loaded
+            generatePresetButtons();
+
             renderSounds();
+
+            // Set first preset as default (or conversational if it exists)
+            const firstPresetId = Object.keys(presets)[0] || 'conversational';
+            const defaultRadio = document.querySelector(`input[name="preset"][value="${firstPresetId}"]`);
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+            }
+            const desc = document.getElementById('preset-description');
+            if (presets[firstPresetId]) {
+                desc.textContent = presets[firstPresetId].description;
+            }
         })();
 
         // Canvas interaction
         const mainCanvas = document.getElementById('main-canvas');
+
+        let lastClickPos = null;
+        let lastClickTime = 0;
 
         mainCanvas.addEventListener('mousedown', (e) => {
             const rect = mainCanvas.getBoundingClientRect();
             const x = (e.clientX - rect.left) * (mainCanvas.width / rect.width);
             const y = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
 
-            const tone = getToneAtPosition(x, y);
+            // Check if clicking same position within 500ms - cycle through overlapping tones
+            const now = Date.now();
+            const sameSpot = lastClickPos && Math.abs(x - lastClickPos.x) < 10 && Math.abs(y - lastClickPos.y) < 10;
+            const quickClick = now - lastClickTime < 500;
+
+            let tone = getToneAtPosition(x, y);
+
+            // Cycle through overlapping tones if clicking same spot quickly
+            if (tone && sameSpot && quickClick && tone.allMatches && tone.allMatches.length > 1) {
+                const currentIdx = hoverState ? hoverState.toneIdx : tone.toneIdx;
+                const currentPos = tone.allMatches.indexOf(currentIdx);
+                if (currentPos !== -1) {
+                    const nextPos = (currentPos + 1) % tone.allMatches.length;
+                    tone.toneIdx = tone.allMatches[nextPos];
+                }
+            }
+
+            lastClickPos = { x, y };
+            lastClickTime = now;
+
             if (tone) {
                 const { soundId, toneIdx, pixelsPerSecond, soundHeight } = tone;
                 const config = soundsConfig[soundId].tones[toneIdx];
+
+                // Update hover to show which tone is selected
+                hoverState = { soundId, toneIdx };
+                selectedState = { soundId, toneIdx };
+                drawMainCanvas();
 
                 dragState = {
                     soundId,
@@ -705,9 +1286,11 @@
                     startY: y,
                     startFreq: config.freq,
                     startDuration: config.duration,
+                    startStart: config.start,
                     pixelsPerSecond,
                     soundHeight,
-                    hasMoved: false
+                    hasMoved: false,
+                    isShiftDrag: e.shiftKey
                 };
                 mainCanvas.style.cursor = 'grabbing';
             }
@@ -720,7 +1303,9 @@
 
             // Update hover state
             if (!dragState) {
-                const tone = getToneAtPosition(x, y);
+                // Prefer currently hovered tone if it's still under cursor
+                const preferredIdx = hoverState ? hoverState.toneIdx : null;
+                const tone = getToneAtPosition(x, y, preferredIdx);
                 if (tone && (!hoverState || hoverState.soundId !== tone.soundId || hoverState.toneIdx !== tone.toneIdx)) {
                     hoverState = { soundId: tone.soundId, toneIdx: tone.toneIdx };
                     drawMainCanvas();
@@ -739,7 +1324,6 @@
             const y = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
 
             const tone = soundsConfig[dragState.soundId].tones[dragState.toneIdx];
-            if (tone.silent) return;
 
             // Calculate deltas
             const deltaX = x - dragState.startX;
@@ -759,32 +1343,42 @@
                 dragState.hasMoved = true;
             }
 
-            // Update duration (horizontal drag) - only if locked horizontal or no lock yet
-            if (dragState.lockAxis === 'horizontal' || !dragState.lockAxis) {
-                const durationChange = deltaX / dragState.pixelsPerSecond;
-                let newDuration = Math.max(0.01, Math.min(0.5, dragState.startDuration + durationChange));
-                newDuration = Math.round(newDuration * 100) / 100;
-                tone.duration = newDuration;
+            // Shift+drag: modify start time (horizontal only)
+            if (dragState.isShiftDrag) {
+                const startChange = deltaX / dragState.pixelsPerSecond;
+                let newStart = Math.max(0, dragState.startStart + startChange);
+                newStart = Math.round(newStart * 100) / 100;
+                tone.start = newStart;
             }
+            // Normal drag: modify duration and frequency
+            else {
+                // Update duration (horizontal drag) - only if locked horizontal or no lock yet
+                if (dragState.lockAxis === 'horizontal' || !dragState.lockAxis) {
+                    const durationChange = deltaX / dragState.pixelsPerSecond;
+                    let newDuration = Math.max(0.01, Math.min(0.5, dragState.startDuration + durationChange));
+                    newDuration = Math.round(newDuration * 100) / 100;
+                    tone.duration = newDuration;
+                }
 
-            // Update frequency (vertical drag) - only if locked vertical or no lock yet
-            if (dragState.lockAxis === 'vertical' || !dragState.lockAxis) {
-                const minFreq = 200;
-                const maxFreq = 2000;
+                // Update frequency (vertical drag) - only if locked vertical or no lock yet
+                if (dragState.lockAxis === 'vertical' || !dragState.lockAxis) {
+                    const minFreq = 200;
+                    const maxFreq = 2000;
 
-                // Convert to logarithmic scale
-                const logMin = Math.log(minFreq);
-                const logMax = Math.log(maxFreq);
-                const logRange = logMax - logMin;
+                    // Convert to logarithmic scale
+                    const logMin = Math.log(minFreq);
+                    const logMax = Math.log(maxFreq);
+                    const logRange = logMax - logMin;
 
-                // Calculate change in log space (proportional change)
-                const logChange = (-deltaY / dragState.soundHeight) * logRange;
-                const startLogFreq = Math.log(dragState.startFreq);
-                let newLogFreq = Math.max(logMin, Math.min(logMax, startLogFreq + logChange));
+                    // Calculate change in log space (proportional change)
+                    const logChange = (-deltaY / dragState.soundHeight) * logRange;
+                    const startLogFreq = Math.log(dragState.startFreq);
+                    let newLogFreq = Math.max(logMin, Math.min(logMax, startLogFreq + logChange));
 
-                // Convert back to linear frequency and snap to semitone
-                let newFreq = Math.exp(newLogFreq);
-                tone.freq = snapToSemitone(newFreq);
+                    // Convert back to linear frequency and snap to semitone
+                    let newFreq = Math.exp(newLogFreq);
+                    tone.freq = snapToSemitone(newFreq);
+                }
             }
 
             // Update UI
@@ -805,6 +1399,7 @@
                 mainCanvas.style.cursor = 'grab';
 
                 // Save config immediately on release
+                switchToCustom(); // User edited manually
                 saveSoundsConfig();
 
                 // Play the sound
@@ -815,23 +1410,135 @@
             }
         });
 
-        // Arrow key controls for hovered tone
-        document.addEventListener('keydown', (e) => {
-            if (!hoverState || dragState) return; // Only when hovering, not dragging
+        // Get all tones in order for Tab navigation
+        function getAllTones() {
+            const allTones = [];
+            for (const soundId of Object.keys(soundsConfig)) {
+                const tones = soundsConfig[soundId].tones;
+                for (let toneIdx = 0; toneIdx < tones.length; toneIdx++) {
+                    allTones.push({ soundId, toneIdx });
+                }
+            }
+            return allTones;
+        }
 
-            const { soundId, toneIdx } = hoverState;
+        // Arrow key controls for hovered or selected tone
+        document.addEventListener('keydown', (e) => {
+            const activeState = selectedState || hoverState;
+            if (!activeState || dragState) return; // Only when hovering/selected, not dragging
+
+            const { soundId, toneIdx } = activeState;
             const tone = soundsConfig[soundId].tones[toneIdx];
             let changed = false;
 
+            // Enter key plays sound immediately
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                playSound(soundId);
+                return;
+            }
+
+            // Backspace to remove tone
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                const tones = soundsConfig[soundId].tones;
+                if (tones.length > 1) {
+                    tones.splice(toneIdx, 1);
+                    // Adjust selection to previous tone if we deleted the last one
+                    const newToneIdx = toneIdx >= tones.length ? tones.length - 1 : toneIdx;
+                    selectedState = { soundId, toneIdx: newToneIdx };
+                    hoverState = selectedState;
+                    switchToCustom(); // User edited manually
+                    drawMainCanvas();
+                    renderSounds();
+                    saveSoundsConfig();
+                    saveToServer();
+                }
+                return;
+            }
+
+            // Shift+Space to add new tone after current
+            if (e.key === ' ' && e.shiftKey) {
+                e.preventDefault();
+                const tones = soundsConfig[soundId].tones;
+                // Copy properties from current tone for new tone, position it after
+                const newTone = {
+                    freq: tone.freq,
+                    start: tone.start + tone.duration,
+                    duration: 0.1,
+                    volume: tone.volume,
+                    silent: false
+                };
+                tones.splice(toneIdx + 1, 0, newTone);
+                // Select the new tone
+                selectedState = { soundId, toneIdx: toneIdx + 1 };
+                hoverState = selectedState;
+                switchToCustom(); // User edited manually
+                drawMainCanvas();
+                renderSounds();
+                saveSoundsConfig();
+                saveToServer();
+                return;
+            }
+
+            // Handle Tab navigation
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const allTones = getAllTones();
+                const currentIdx = allTones.findIndex(t => t.soundId === soundId && t.toneIdx === toneIdx);
+
+                if (currentIdx !== -1) {
+                    const nextIdx = e.shiftKey
+                        ? (currentIdx - 1 + allTones.length) % allTones.length
+                        : (currentIdx + 1) % allTones.length;
+                    selectedState = allTones[nextIdx];
+                    hoverState = selectedState; // Also update hover for display
+                    drawMainCanvas();
+                    renderSounds();
+                }
+                return;
+            }
+
+            // Shift+Arrow for navigation
+            if (e.shiftKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                e.preventDefault();
+                // Navigate to previous/next sound
+                const soundIds = Object.keys(soundsConfig);
+                const currentSoundIdx = soundIds.indexOf(soundId);
+                const newSoundIdx = e.key === 'ArrowUp'
+                    ? (currentSoundIdx - 1 + soundIds.length) % soundIds.length
+                    : (currentSoundIdx + 1) % soundIds.length;
+                selectedState = { soundId: soundIds[newSoundIdx], toneIdx: 0 };
+                hoverState = selectedState;
+                drawMainCanvas();
+                renderSounds();
+                return;
+            } else if (e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                e.preventDefault();
+                // Navigate to previous/next tone within sound
+                const numTones = soundsConfig[soundId].tones.length;
+                const newToneIdx = e.key === 'ArrowLeft'
+                    ? (toneIdx - 1 + numTones) % numTones
+                    : (toneIdx + 1) % numTones;
+                selectedState = { soundId, toneIdx: newToneIdx };
+                hoverState = selectedState;
+                drawMainCanvas();
+                renderSounds();
+                return;
+            }
+
+            // Regular arrow key adjustments (no shift)
             if (e.key === 'ArrowUp') {
-                // Increase frequency by one semitone
-                const currentSemitone = freqToSemitone(tone.freq);
+                // Snap to nearest semitone first, then increase by one semitone
+                const snapped = snapToSemitone(tone.freq);
+                const currentSemitone = freqToSemitone(snapped);
                 tone.freq = Math.round(semitoneToFreq(currentSemitone + 1));
                 changed = true;
                 e.preventDefault();
             } else if (e.key === 'ArrowDown') {
-                // Decrease frequency by one semitone
-                const currentSemitone = freqToSemitone(tone.freq);
+                // Snap to nearest semitone first, then decrease by one semitone
+                const snapped = snapToSemitone(tone.freq);
+                const currentSemitone = freqToSemitone(snapped);
                 tone.freq = Math.round(semitoneToFreq(currentSemitone - 1));
                 changed = true;
                 e.preventDefault();
@@ -848,6 +1555,8 @@
             }
 
             if (changed) {
+                selectedState = activeState; // Mark as selected after editing
+                switchToCustom(); // User edited manually
                 drawMainCanvas();
                 renderSounds();
                 saveSoundsConfig();
@@ -856,8 +1565,11 @@
                     saveToServer();
                 }, 500);
 
-                // Play the sound to hear the change
-                playSound(soundId);
+                // Play the sound with 200ms debounce for arrow keys
+                clearTimeout(playSoundTimeout);
+                playSoundTimeout = setTimeout(() => {
+                    playSound(soundId);
+                }, 200);
             }
         });
     </script>
