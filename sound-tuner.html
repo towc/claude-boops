@@ -631,7 +631,7 @@
             } catch (error) {
                 statusDiv.style.background = '#ff3366';
                 statusDiv.textContent = '✗ Server not connected!';
-                showConnectionStatus(false, '❌ Cannot connect to server. Please run: ~/.claude/boops/settings.sh');
+                showConnectionStatus(false, '❌ Cannot connect to server. Please run settings.sh from the plugin directory.');
             }
 
             setTimeout(() => {
@@ -668,7 +668,7 @@
                     return true;
                 }
             } catch (e) {
-                showConnectionStatus(false, '❌ Server not running. Please run: ~/.claude/boops/settings.sh');
+                showConnectionStatus(false, '❌ Server not running. Please run settings.sh from the plugin directory.');
                 return false;
             }
             return false;

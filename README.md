@@ -25,12 +25,32 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 
 ## Quick Start
 
+### Easy Installation (Recommended)
+
+Install as a Claude Code plugin:
+
+```bash
+# Add the marketplace
+/plugin marketplace add towc/claude-boops
+
+# Install the plugin (automatically enabled)
+/plugin install claude-boops
+```
+
+Then restart Claude Code!
+
+### Manual Installation (Alternative)
+
+If you prefer manual installation:
+
 ```bash
 git clone https://github.com/towc/claude-boops.git ~/.claude/boops
 ~/.claude/boops/setup.sh
 ```
 
 Then restart Claude Code!
+
+The plugin includes pre-generated sound files, so it works immediately after installation. You can customize the sounds later (see Customizing Sounds section).
 
 ## Sounds
 
@@ -47,9 +67,9 @@ Then restart Claude Code!
 
 Edit your sounds with the visual interface:
 
-```bash
-~/.claude/boops/settings.sh
-```
+**If installed as a plugin:** Type `/settings` in Claude Code for instructions
+
+**If installed manually:** Run `~/.claude/boops/settings.sh`
 
 This will:
 1. Start the sound server
@@ -75,8 +95,8 @@ The editor shows:
 Share your `config.json` file with friends! It contains all the tone parameters (frequency, duration, volume) for each sound.
 
 To use someone else's config:
-1. Copy their `config.json` to `~/.claude/boops/`
-2. Run `~/.claude/boops/settings.sh`
+1. Copy their `config.json` to the plugin directory
+2. Run the settings script (see Customizing Sounds above)
 3. Click "Generate Sound Files"
 
 ## How It Works
@@ -100,9 +120,16 @@ The bash scripts use `jq` to parse Claude's JSONL transcript format and intellig
 ## File Structure
 
 ```
-~/.claude/boops/
+claude-boops/
+├── .claude-plugin/
+│   ├── plugin.json            # Plugin metadata
+│   └── marketplace.json       # Marketplace listing
+├── commands/
+│   └── settings.md            # /settings command for customization
+├── hooks/
+│   └── hooks.json             # Hook definitions (auto-installed)
 ├── README.md                  # This file
-├── setup.sh                   # Installation script
+├── setup.sh                   # Manual installation script
 ├── settings.sh                # Opens editor and starts server
 ├── config.json                # Sound configuration
 ├── sound-tuner.html           # Visual editor
@@ -111,7 +138,7 @@ The bash scripts use `jq` to parse Claude's JSONL transcript format and intellig
 ├── smart-notification.sh      # Handles permission prompts
 ├── smart-stop.sh              # Detects success vs error
 ├── play-exclusive.sh          # Plays sounds exclusively
-└── *.wav                      # Generated sound files
+└── *.wav                      # Pre-generated sound files
 ```
 
 ## Troubleshooting
@@ -131,6 +158,15 @@ The bash scripts use `jq` to parse Claude's JSONL transcript format and intellig
 - Verify you clicked "Generate Sound Files" button
 
 ## Uninstall
+
+### If Installed as Plugin
+
+```bash
+/plugin disable claude-boops
+/plugin uninstall claude-boops
+```
+
+### If Installed Manually
 
 ```bash
 # Remove hooks from settings

@@ -4,7 +4,7 @@
 # Read the hook JSON data from stdin
 INPUT=$(cat)
 
-SOUND_DIR="$HOME/.claude/boops"
+SOUND_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/boops}"
 
 # Extract transcript path from hook JSON
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // ""' 2>/dev/null)

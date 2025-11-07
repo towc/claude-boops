@@ -3,7 +3,7 @@
 # Claude Boops - Settings Interface
 # Opens the sound tuner and starts the server
 
-BOOPS_DIR="$HOME/.claude/boops"
+BOOPS_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/boops}"
 
 echo "🔊 Claude Boops - Sound Editor"
 echo "=============================="

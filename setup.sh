@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Claude Boops - Installation Script
+# Claude Boops - Manual Installation Script
 # Sets up sound notifications for Claude Code
+#
+# NOTE: This is for manual installation. For easier setup, consider using:
+#   /plugin marketplace add towc/claude-boops
+#   /plugin install claude-boops
 
-INSTALL_DIR="$HOME/.claude/boops"
+INSTALL_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/boops}"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 
 echo "🔊 Claude Boops - Sound Notifications for Claude Code"
 echo "=================================================="
+echo ""
+echo "📝 Note: Installing manually. For easier setup next time, use the plugin system!"
 echo ""
 
 # Check if Claude Code is installed
@@ -116,6 +122,10 @@ echo "✅ Installation complete!"
 echo ""
 echo "Next steps:"
 echo "  1. Restart Claude Code for changes to take effect"
-echo "  2. To customize sounds, run: ~/.claude/boops/settings.sh"
+echo "  2. To customize sounds, run: $INSTALL_DIR/settings.sh"
+echo ""
+echo "💡 Tip: For easier updates, consider using the plugin system instead:"
+echo "   /plugin marketplace add towc/claude-boops"
+echo "   /plugin install claude-boops"
 echo ""
 echo "Sound files are in: $INSTALL_DIR"

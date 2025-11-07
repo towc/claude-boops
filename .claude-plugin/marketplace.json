@@ -1,8 +1,7 @@
 {
-  "name": "claude-boops-dev",
+  "name": "claude-boops-marketplace",
   "owner": {
-    "name": "towc",
-    "email": "dev@local"
+    "name": "towc"
   },
   "plugins": [
     {
