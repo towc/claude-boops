@@ -210,8 +210,16 @@ async function determineSound(hookType, hookData) {
           return null; // Don't play any sound
         }
 
-        // Check for error indicators
-        if (/(couldn't|can't|unable|failed|error|problem|issue|sorry|unfortunately)/i.test(lastText)) {
+        // Check for error indicators - only at the START of the message (first 300 chars)
+        // and only for actual failure statements, not just mentions of problems
+        const messageStart = lastText.slice(0, 300).toLowerCase();
+        const hasActualError =
+          /^(i'm sorry,? (but )?i (couldn't|wasn't able|failed|can't))/i.test(messageStart) ||
+          /^unfortunately,? i (couldn't|wasn't able|failed|can't)/i.test(messageStart) ||
+          /the .{1,30} (failed|didn't work|couldn't be)/i.test(messageStart) ||
+          /\b(failed with|error:|fatal|exception|crashed)\b/i.test(messageStart);
+
+        if (hasActualError) {
           return 'completion-error';
         }
       } catch (e) {
