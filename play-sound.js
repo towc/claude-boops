@@ -184,17 +184,27 @@ async function determineSound(hookType, hookData) {
 
         // Look at the last few assistant messages
         const recentMessages = transcript.slice(-50).reverse();
+
+        // Check if ANY recent assistant message had AskUserQuestion
+        const hasRecentQuestion = recentMessages
+          .filter(entry => entry.message?.role === 'assistant')
+          .some(entry => {
+            const tools = entry.message?.content?.filter(c => c.type === 'tool_use') || [];
+            return tools.some(tool => tool.name === 'AskUserQuestion');
+          });
+
+        if (hasRecentQuestion) {
+          log('Detected answer to question');
+          return 'answer-submit';
+        }
+
+        // Also check text for question patterns
         const lastAssistantText = recentMessages
           .find(entry => entry.message?.role === 'assistant')
           ?.message?.content?.find(c => c.type === 'text')?.text || '';
 
-        const lastTool = recentMessages
-          .find(entry => entry.message?.role === 'assistant')
-          ?.message?.content?.find(c => c.type === 'tool_use')?.name || '';
-
-        // Check if last message was a question
-        if (/(which|what|would you like|choose|select one|permission).*\?/i.test(lastAssistantText) ||
-            lastTool === 'AskUserQuestion') {
+        if (/(which|what|would you like|choose|select one|permission).*\?/i.test(lastAssistantText)) {
+          log('Detected answer to text question');
           return 'answer-submit';
         }
       } catch (e) {
