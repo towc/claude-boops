@@ -103,7 +103,7 @@ Example with generated tones:
 
 Use the interactive visual editor to design sounds:
 
-**If installed as a plugin:** Type `/settings` in Claude Code for instructions
+**If installed as a plugin:** Type `/claude-boops:settings` in Claude Code to launch the editor
 
 **If installed manually:** Run `~/.claude/boops/settings.sh`
 
