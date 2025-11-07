@@ -16,7 +16,7 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 
 ## Features
 
-- 🎵 **6 Different Sounds** for different events (submit, question, permission, success, error, answer)
+- 🎵 **5 Different Sounds** for different events (submit, question, permission, success, error)
 - ⚡ **Dynamic Sound Generation** - sounds generated on-the-fly from config.json
 - 🎨 **Interactive Visual Editor** with drag-to-edit interface (optional)
 - 📊 **Logarithmic Frequency Control** for better precision
@@ -59,7 +59,6 @@ The plugin works immediately after installation - sounds are generated dynamical
 | Event | Config ID | Description |
 |-------|-----------|-------------|
 | User Submit | `user-submit` | When you press enter |
-| Answer Submit | `answer-submit` | When you answer a question or grant permission |
 | Permission Needed | `permission-needed` | When permission prompts appear |
 | Question | `question` | Multiple choice questions |
 | Success | `completion-success` | Normal completions (skipped if a question was asked) |

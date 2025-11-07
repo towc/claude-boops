@@ -4,26 +4,8 @@
     "description": "When you press enter",
     "tones": [
       {
-        "freq": 340,
-        "duration": 0.09,
-        "volume": 0.25,
-        "silent": false
-      }
-    ]
-  },
-  "answer-submit": {
-    "name": "Answer Submit",
-    "description": "When you answer a question or grant permission",
-    "tones": [
-      {
-        "freq": 350,
-        "duration": 0.11,
-        "volume": 0.25,
-        "silent": false
-      },
-      {
-        "freq": 450,
-        "duration": 0.11,
+        "freq": 330,
+        "duration": 0.14,
         "volume": 0.25,
         "silent": false
       }
@@ -34,20 +16,14 @@
     "description": "Permission prompts",
     "tones": [
       {
-        "freq": 550,
-        "duration": 0.11,
+        "freq": 570,
+        "duration": 0.14,
         "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 700,
-        "duration": 0.09,
-        "volume": 0.28,
-        "silent": false
-      },
-      {
-        "freq": 590,
-        "duration": 0.1,
+        "freq": 440,
+        "duration": 0.15,
         "volume": 0.28,
         "silent": false
       }
@@ -59,19 +35,13 @@
     "tones": [
       {
         "freq": 650,
-        "duration": 0.11,
+        "duration": 0.14,
         "volume": 0.28,
         "silent": false
       },
       {
         "freq": 800,
-        "duration": 0.09,
-        "volume": 0.28,
-        "silent": false
-      },
-      {
-        "freq": 700,
-        "duration": 0.1,
+        "duration": 0.15,
         "volume": 0.28,
         "silent": false
       }
@@ -82,20 +52,20 @@
     "description": "Normal completions",
     "tones": [
       {
-        "freq": 650,
-        "duration": 0.12,
+        "freq": 590,
+        "duration": 0.14,
         "volume": 0.26,
         "silent": false
       },
       {
-        "freq": 850,
-        "duration": 0.11,
+        "freq": 790,
+        "duration": 0.15,
         "volume": 0.26,
         "silent": false
       },
       {
-        "freq": 1000,
-        "duration": 0.11,
+        "freq": 1070,
+        "duration": 0.14,
         "volume": 0.26,
         "silent": false
       }
@@ -107,19 +77,19 @@
     "tones": [
       {
         "freq": 750,
-        "duration": 0.13,
+        "duration": 0.14,
         "volume": 0.28,
         "silent": false
       },
       {
-        "freq": 540,
-        "duration": 0.11,
+        "freq": 640,
+        "duration": 0.15,
         "volume": 0.28,
         "silent": false
       },
       {
         "freq": 400,
-        "duration": 0.13,
+        "duration": 0.17,
         "volume": 0.28,
         "silent": false
       }
