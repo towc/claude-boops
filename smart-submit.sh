@@ -2,7 +2,9 @@
 
 # Read from stdin
 INPUT=$(cat)
-SOUND_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/boops}"
+# Detect script location - works for both marketplace and manual install
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SOUND_DIR="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}}"
 
 # Extract transcript path from hook JSON
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // ""' 2>/dev/null)

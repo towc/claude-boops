@@ -2,7 +2,9 @@
 # Notification sound for permission prompts
 
 INPUT=$(cat)
-SOUND_DIR="${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/boops}"
+# Detect script location - works for both marketplace and manual install
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SOUND_DIR="${CLAUDE_PLUGIN_ROOT:-${SCRIPT_DIR}}"
 
 # Extract the notification message
 MESSAGE=$(echo "$INPUT" | jq -r '.message // ""' 2>/dev/null)
