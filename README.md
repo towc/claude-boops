@@ -2,6 +2,8 @@
 
 Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audio feedback for different interaction events!
 
+**[🎮 Try the Interactive Demo](https://towc.github.io/claude-boops/)** - Test all sounds and presets in your browser!
+
 ## ⚠️ Warning
 
 **This project was entirely vibecoded with Claude and is provided as-is.** Use at your own risk!

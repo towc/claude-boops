@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html>
+<!--
+    Claude Boops - Interactive Demo
+
+    This is a read-only demo of the Claude Boops sound editor.
+    To install and use the full version, visit:
+    https://github.com/towc/claude-boops
+
+    Features:
+    - Explore different sound presets
+    - Play sounds to hear what they sound like
+    - See how sounds work in context with the simulator
+    - All sounds generated in-browser using Web Audio API
+
+    Note: This is a demo version - changes are not saved.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Boops - Interactive Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .banner {
+            background: linear-gradient(135deg, #0099ff 0%, #ff9500 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .banner h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            color: white;
+        }
+        .banner p {
+            margin: 8px 0;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        .banner a {
+            color: white;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        .banner a:hover {
+            opacity: 0.8;
+        }
+        .content {
+            padding: 0 20px 20px 20px;
+        }
+        h1 { color: #ff9500; margin-bottom: 10px; }
+        h2 { color: #0099ff; margin: 15px 0 8px 0; font-size: 17px; }
+        .sound-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .description {
+            color: #888;
+            font-size: 12px;
+            margin: 3px 0 10px 0;
+        }
+        .tone-row {
+            display: grid;
+            grid-template-columns: 30px 140px 120px 100px 60px 60px;
+            gap: 12px;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        .tone-row label {
+            font-size: 11px;
+            color: #888;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .tone-num {
+            color: #666;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #0099ff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #0099ff;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .value-display {
+            color: #0099ff;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: center;
+        }
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        button {
+            background: #0099ff;
+            color: white;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 3px;
+        }
+        button:hover { background: #007acc; }
+        button.play { background: #00cc66; }
+        button.play:hover { background: #00aa55; }
+        button.reset { background: #ff9500; }
+        button.reset:hover { background: #cc7700; }
+        button.add-tone {
+            background: #555;
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        button.add-tone:hover { background: #666; }
+        button.remove-tone {
+            background: #ff3366;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        button.remove-tone:hover { background: #cc0044; }
+        .button-group {
+            display: flex;
+            gap: 6px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .preset-radio:has(input:checked) {
+            background: #0099ff22 !important;
+            border-color: #0099ff !important;
+        }
+        .preset-radio:hover {
+            border-color: #0099ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h1>🔊 Claude Boops - Interactive Demo</h1>
+        <p>Explore sound themes for Claude Code notifications</p>
+        <p>Want to install? Visit <a href="https://github.com/towc/claude-boops" target="_blank">github.com/towc/claude-boops</a></p>
+        <p style="font-size: 12px; opacity: 0.8;">Note: This is a read-only demo. Changes are not saved.</p>
+    </div>
+
+    <div class="content">
+
+    <div style="background: #222; padding: 16px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <label style="font-weight: bold; color: #0099ff;">Sound Preset</label>
+        </div>
+        <div id="preset-buttons-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px;">
+            <!-- Preset buttons will be dynamically generated here -->
+        </div>
+        <div style="padding: 10px; background: #1a1a1a; border-radius: 4px; font-size: 12px; color: #888;" id="preset-description">
+            Select a preset to try different sound themes. Edit any sound to switch to Custom mode.
+        </div>
+    </div>
+
+    <div style="background: #222; padding: 16px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <label style="font-weight: bold; color: #0099ff;">Simulator</label>
+            <button id="simulate-btn" style="padding: 8px 16px; background: #0099ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">▶ Play Demo</button>
+        </div>
+        <div id="simulator-output" style="background: #0d0d0d; border: 1px solid #333; border-radius: 4px; padding: 12px; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.8; height: 300px; overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 170px 1fr; gap: 12px;">
+                <div></div>
+                <div style="color: #777; font-style: italic;">Click "Play Demo" to simulate a Claude Code conversation and hear the sounds in context.</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: #222; padding: 16px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px; text-align: center;">
+        <div style="font-size: 18px; margin-bottom: 8px;">📊</div>
+        <div style="color: #0099ff; font-weight: bold; margin-bottom: 8px; font-size: 16px;">Visual Sound Timeline</div>
+        <div style="color: #888; font-size: 13px;">
+            Below you can see a visual representation of each sound's tones over time.<br>
+            Hover over the bars to see details. Switch between presets to compare different sound themes.
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; font-size: 12px; color: #888;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: white; border: 2px solid black;"></div>
+            <span>Natural note</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: black; border: 2px solid white;"></div>
+            <span>Sharp/flat</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="color: #00ddff; font-weight: bold;">+7</span>
+            <span>Semitones from 1st tone</span>
+        </div>
+    </div>
+
+    <canvas id="main-canvas" width="1200" height="600" style="width: 100%; height: 600px; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; margin-bottom: 20px; cursor: default;"></canvas>
+
+    <div id="sounds-container"></div>
+
+    </div><!-- end .content -->
+
+    <script>
+        // Embedded configuration from config.json
+        const EMBEDDED_CONFIG = {
+  "_presets": {
+    "conversational": {
+      "name": "Conversational",
+      "description": "Friendly text-message style - warm and approachable",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 440,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.2
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.25
+            },
+            {
+              "freq": 659,
+              "start": 0.26,
+              "duration": 0.26,
+              "volume": 0.22
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.25
+            },
+            {
+              "freq": 784,
+              "start": 0.26,
+              "duration": 0.32,
+              "volume": 0.22
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 392,
+              "start": 0,
+              "duration": 0.32,
+              "volume": 0.22
+            },
+            {
+              "freq": 523,
+              "start": 0.32,
+              "duration": 0.32,
+              "volume": 0.2
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.22
+            },
+            {
+              "freq": 659,
+              "start": 0.26,
+              "duration": 0.26,
+              "volume": 0.24
+            },
+            {
+              "freq": 784,
+              "start": 0.52,
+              "duration": 0.36,
+              "volume": 0.25
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 330,
+              "start": 0,
+              "duration": 0.36,
+              "volume": 0.3
+            },
+            {
+              "freq": 294,
+              "start": 0.36,
+              "duration": 0.42,
+              "volume": 0.32
+            }
+          ]
+        }
+      }
+    },
+    "minimal": {
+      "name": "Minimal",
+      "description": "Subtle and understated - barely there",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 880,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.15
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 1047,
+              "start": 0,
+              "duration": 0.18,
+              "volume": 0.18
+            },
+            {
+              "freq": 880,
+              "start": 0.18,
+              "duration": 0.18,
+              "volume": 0.16
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 880,
+              "start": 0,
+              "duration": 0.18,
+              "volume": 0.18
+            },
+            {
+              "freq": 1047,
+              "start": 0.18,
+              "duration": 0.18,
+              "volume": 0.16
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 784,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.16
+            },
+            {
+              "freq": 880,
+              "start": 0.21,
+              "duration": 0.21,
+              "volume": 0.14
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 880,
+              "start": 0,
+              "duration": 0.18,
+              "volume": 0.16
+            },
+            {
+              "freq": 1047,
+              "start": 0.18,
+              "duration": 0.18,
+              "volume": 0.17
+            },
+            {
+              "freq": 1319,
+              "start": 0.36,
+              "duration": 0.21,
+              "volume": 0.18
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 587,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.22
+            },
+            {
+              "freq": 494,
+              "start": 0.26,
+              "duration": 0.29,
+              "volume": 0.24
+            }
+          ]
+        }
+      }
+    },
+    "playful": {
+      "name": "Playful",
+      "description": "Bouncy and fun - makes coding feel lighter",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.22
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 587,
+              "start": 0,
+              "duration": 0.22,
+              "volume": 0.24
+            },
+            {
+              "freq": 494,
+              "start": 0.22,
+              "duration": 0.22,
+              "volume": 0.26
+            },
+            {
+              "freq": 523,
+              "start": 0.44,
+              "duration": 0.21,
+              "volume": 0.22
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.22,
+              "volume": 0.24
+            },
+            {
+              "freq": 659,
+              "start": 0.22,
+              "duration": 0.22,
+              "volume": 0.26
+            },
+            {
+              "freq": 784,
+              "start": 0.44,
+              "duration": 0.26,
+              "volume": 0.24
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 440,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.22
+            },
+            {
+              "freq": 523,
+              "start": 0.26,
+              "duration": 0.26,
+              "volume": 0.24
+            },
+            {
+              "freq": 587,
+              "start": 0.52,
+              "duration": 0.21,
+              "volume": 0.2
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.22,
+              "volume": 0.24
+            },
+            {
+              "freq": 659,
+              "start": 0.22,
+              "duration": 0.22,
+              "volume": 0.26
+            },
+            {
+              "freq": 784,
+              "start": 0.44,
+              "duration": 0.22,
+              "volume": 0.27
+            },
+            {
+              "freq": 1047,
+              "start": 0.66,
+              "duration": 0.32,
+              "volume": 0.28
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 370,
+              "start": 0,
+              "duration": 0.32,
+              "volume": 0.28
+            },
+            {
+              "freq": 311,
+              "start": 0.32,
+              "duration": 0.36,
+              "volume": 0.3
+            }
+          ]
+        }
+      }
+    },
+    "focus": {
+      "name": "Focus",
+      "description": "Calm and centered - doesn't break concentration",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 349,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.18
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 440,
+              "start": 0,
+              "duration": 0.36,
+              "volume": 0.2
+            },
+            {
+              "freq": 392,
+              "start": 0.36,
+              "duration": 0.36,
+              "volume": 0.18
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 349,
+              "start": 0,
+              "duration": 0.36,
+              "volume": 0.2
+            },
+            {
+              "freq": 440,
+              "start": 0.36,
+              "duration": 0.36,
+              "volume": 0.18
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 294,
+              "start": 0,
+              "duration": 0.39,
+              "volume": 0.18
+            },
+            {
+              "freq": 349,
+              "start": 0.39,
+              "duration": 0.39,
+              "volume": 0.16
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 349,
+              "start": 0,
+              "duration": 0.36,
+              "volume": 0.18
+            },
+            {
+              "freq": 440,
+              "start": 0.36,
+              "duration": 0.36,
+              "volume": 0.19
+            },
+            {
+              "freq": 523,
+              "start": 0.72,
+              "duration": 0.42,
+              "volume": 0.2
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 277,
+              "start": 0,
+              "duration": 0.45,
+              "volume": 0.24
+            },
+            {
+              "freq": 233,
+              "start": 0.45,
+              "duration": 0.45,
+              "volume": 0.26
+            }
+          ]
+        }
+      }
+    },
+    "retro": {
+      "name": "Retro",
+      "description": "8-bit video game nostalgia - like you're coding in 1985",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 1047,
+              "start": 0,
+              "duration": 0.18,
+              "volume": 0.22
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 784,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.26
+            },
+            {
+              "freq": 659,
+              "start": 0.21,
+              "duration": 0.21,
+              "volume": 0.24
+            },
+            {
+              "freq": 523,
+              "start": 0.42,
+              "duration": 0.22,
+              "volume": 0.22
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.26
+            },
+            {
+              "freq": 784,
+              "start": 0.21,
+              "duration": 0.21,
+              "volume": 0.26
+            },
+            {
+              "freq": 1047,
+              "start": 0.42,
+              "duration": 0.26,
+              "volume": 0.24
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.22,
+              "volume": 0.24
+            },
+            {
+              "freq": 784,
+              "start": 0.22,
+              "duration": 0.26,
+              "volume": 0.22
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.24
+            },
+            {
+              "freq": 659,
+              "start": 0.21,
+              "duration": 0.21,
+              "volume": 0.26
+            },
+            {
+              "freq": 784,
+              "start": 0.42,
+              "duration": 0.21,
+              "volume": 0.27
+            },
+            {
+              "freq": 1047,
+              "start": 0.63,
+              "duration": 0.32,
+              "volume": 0.28
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 494,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.32
+            },
+            {
+              "freq": 392,
+              "start": 0.26,
+              "duration": 0.32,
+              "volume": 0.34
+            },
+            {
+              "freq": 311,
+              "start": 0.5800000000000001,
+              "duration": 0.36,
+              "volume": 0.36
+            }
+          ]
+        }
+      }
+    },
+    "professional": {
+      "name": "Professional",
+      "description": "Corporate meeting vibes - serious and businesslike",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 294,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.2
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 370,
+              "start": 0,
+              "duration": 0.32,
+              "volume": 0.24
+            },
+            {
+              "freq": 330,
+              "start": 0.32,
+              "duration": 0.36,
+              "volume": 0.22
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 294,
+              "start": 0,
+              "duration": 0.32,
+              "volume": 0.24
+            },
+            {
+              "freq": 370,
+              "start": 0.32,
+              "duration": 0.36,
+              "volume": 0.22
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 247,
+              "start": 0,
+              "duration": 0.33,
+              "volume": 0.22
+            },
+            {
+              "freq": 294,
+              "start": 0.33,
+              "duration": 0.36,
+              "volume": 0.2
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 294,
+              "start": 0,
+              "duration": 0.32,
+              "volume": 0.22
+            },
+            {
+              "freq": 370,
+              "start": 0.32,
+              "duration": 0.32,
+              "volume": 0.24
+            },
+            {
+              "freq": 440,
+              "start": 0.64,
+              "duration": 0.42,
+              "volume": 0.25
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 247,
+              "start": 0,
+              "duration": 0.42,
+              "volume": 0.28
+            },
+            {
+              "freq": 208,
+              "start": 0.42,
+              "duration": 0.45,
+              "volume": 0.3
+            }
+          ]
+        }
+      }
+    },
+    "zen": {
+      "name": "Zen",
+      "description": "Meditation bells - peaceful and mindful",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.56,
+              "volume": 0.15
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.5,
+              "volume": 0.18
+            },
+            {
+              "freq": 523,
+              "start": 0.5,
+              "duration": 0.56,
+              "volume": 0.16
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.5,
+              "volume": 0.18
+            },
+            {
+              "freq": 659,
+              "start": 0.5,
+              "duration": 0.56,
+              "volume": 0.16
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 392,
+              "start": 0,
+              "duration": 0.56,
+              "volume": 0.16
+            },
+            {
+              "freq": 523,
+              "start": 0.56,
+              "duration": 0.62,
+              "volume": 0.14
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 523,
+              "start": 0,
+              "duration": 0.5,
+              "volume": 0.16
+            },
+            {
+              "freq": 659,
+              "start": 0.5,
+              "duration": 0.5,
+              "volume": 0.17
+            },
+            {
+              "freq": 784,
+              "start": 1,
+              "duration": 0.67,
+              "volume": 0.18
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 370,
+              "start": 0,
+              "duration": 0.62,
+              "volume": 0.22
+            },
+            {
+              "freq": 311,
+              "start": 0.62,
+              "duration": 0.67,
+              "volume": 0.24
+            }
+          ]
+        }
+      }
+    },
+    "chirpy": {
+      "name": "Chirpy",
+      "description": "Bird-like chirps - nature's keyboard",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 1568,
+              "start": 0,
+              "duration": 0.1,
+              "volume": 0.18
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 1319,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.2
+            },
+            {
+              "freq": 1047,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.18
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 1047,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.2
+            },
+            {
+              "freq": 1319,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.2
+            },
+            {
+              "freq": 1568,
+              "start": 0.28,
+              "duration": 0.14,
+              "volume": 0.18
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 1047,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.18
+            },
+            {
+              "freq": 1319,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.16
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 1047,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.18
+            },
+            {
+              "freq": 1319,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.19
+            },
+            {
+              "freq": 1568,
+              "start": 0.28,
+              "duration": 0.14,
+              "volume": 0.2
+            },
+            {
+              "freq": 1976,
+              "start": 0.42000000000000004,
+              "duration": 0.18,
+              "volume": 0.21
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 880,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.24
+            },
+            {
+              "freq": 740,
+              "start": 0.21,
+              "duration": 0.22,
+              "volume": 0.26
+            }
+          ]
+        }
+      }
+    },
+    "bass": {
+      "name": "Bass",
+      "description": "Deep rumbles - warm and rich low tones",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 196,
+              "start": 0,
+              "duration": 0.36,
+              "volume": 0.32
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 262,
+              "start": 0,
+              "duration": 0.42,
+              "volume": 0.35
+            },
+            {
+              "freq": 220,
+              "start": 0.42,
+              "duration": 0.45,
+              "volume": 0.33
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 196,
+              "start": 0,
+              "duration": 0.42,
+              "volume": 0.35
+            },
+            {
+              "freq": 247,
+              "start": 0.42,
+              "duration": 0.45,
+              "volume": 0.33
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 165,
+              "start": 0,
+              "duration": 0.45,
+              "volume": 0.33
+            },
+            {
+              "freq": 196,
+              "start": 0.45,
+              "duration": 0.48,
+              "volume": 0.31
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 196,
+              "start": 0,
+              "duration": 0.42,
+              "volume": 0.33
+            },
+            {
+              "freq": 247,
+              "start": 0.42,
+              "duration": 0.42,
+              "volume": 0.34
+            },
+            {
+              "freq": 294,
+              "start": 0.84,
+              "duration": 0.5,
+              "volume": 0.35
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 175,
+              "start": 0,
+              "duration": 0.56,
+              "volume": 0.38
+            },
+            {
+              "freq": 147,
+              "start": 0.56,
+              "duration": 0.62,
+              "volume": 0.4
+            }
+          ]
+        }
+      }
+    },
+    "r2d2": {
+      "name": "R2D2",
+      "description": "Astromech droid beeps and whistles",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 1047,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 1319,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.22
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 880,
+              "start": 0,
+              "duration": 0.18,
+              "volume": 0.26
+            },
+            {
+              "freq": 1047,
+              "start": 0.18,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 740,
+              "start": 0.32,
+              "duration": 0.18,
+              "volume": 0.22
+            },
+            {
+              "freq": 587,
+              "start": 0.5,
+              "duration": 0.21,
+              "volume": 0.2
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.26
+            },
+            {
+              "freq": 880,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.28
+            },
+            {
+              "freq": 1047,
+              "start": 0.28,
+              "duration": 0.14,
+              "volume": 0.3
+            },
+            {
+              "freq": 1319,
+              "start": 0.42000000000000004,
+              "duration": 0.18,
+              "volume": 0.26
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 784,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.24
+            },
+            {
+              "freq": 880,
+              "start": 0.21,
+              "duration": 0.18,
+              "volume": 0.22
+            },
+            {
+              "freq": 784,
+              "start": 0.39,
+              "duration": 0.18,
+              "volume": 0.2
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 880,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.26
+            },
+            {
+              "freq": 1047,
+              "start": 0.28,
+              "duration": 0.14,
+              "volume": 0.28
+            },
+            {
+              "freq": 1319,
+              "start": 0.42000000000000004,
+              "duration": 0.14,
+              "volume": 0.3
+            },
+            {
+              "freq": 1568,
+              "start": 0.56,
+              "duration": 0.21,
+              "volume": 0.28
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 587,
+              "start": 0,
+              "duration": 0.26,
+              "volume": 0.3
+            },
+            {
+              "freq": 494,
+              "start": 0.26,
+              "duration": 0.22,
+              "volume": 0.32
+            },
+            {
+              "freq": 440,
+              "start": 0.48,
+              "duration": 0.29,
+              "volume": 0.3
+            }
+          ]
+        }
+      }
+    },
+    "animalese": {
+      "name": "Animalese",
+      "description": "Animal Crossing speaking sounds - cute and bouncy",
+      "sounds": {
+        "user-submit": {
+          "tones": [
+            {
+              "freq": 880,
+              "start": 0,
+              "duration": 0.12,
+              "volume": 0.22
+            }
+          ]
+        },
+        "permission-needed": {
+          "tones": [
+            {
+              "freq": 784,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 880,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.22
+            },
+            {
+              "freq": 784,
+              "start": 0.28,
+              "duration": 0.14,
+              "volume": 0.2
+            }
+          ]
+        },
+        "question": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 784,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 880,
+              "start": 0.28,
+              "duration": 0.18,
+              "volume": 0.22
+            }
+          ]
+        },
+        "completion-normal": {
+          "tones": [
+            {
+              "freq": 784,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.22
+            },
+            {
+              "freq": 880,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.2
+            }
+          ]
+        },
+        "completion-success": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.14,
+              "volume": 0.22
+            },
+            {
+              "freq": 784,
+              "start": 0.14,
+              "duration": 0.14,
+              "volume": 0.24
+            },
+            {
+              "freq": 880,
+              "start": 0.28,
+              "duration": 0.14,
+              "volume": 0.26
+            },
+            {
+              "freq": 1047,
+              "start": 0.42000000000000004,
+              "duration": 0.18,
+              "volume": 0.24
+            }
+          ]
+        },
+        "completion-error": {
+          "tones": [
+            {
+              "freq": 659,
+              "start": 0,
+              "duration": 0.21,
+              "volume": 0.26
+            },
+            {
+              "freq": 587,
+              "start": 0.21,
+              "duration": 0.21,
+              "volume": 0.28
+            },
+            {
+              "freq": 523,
+              "start": 0.42,
+              "duration": 0.22,
+              "volume": 0.26
+            }
+          ]
+        }
+      }
+    }
+  },
+  "user-submit": {
+    "name": "User Submit",
+    "description": "When you press enter",
+    "tones": [
+      {
+        "freq": 659,
+        "start": 0,
+        "duration": 0.26,
+        "volume": 0.22
+      }
+    ]
+  },
+  "permission-needed": {
+    "name": "Permission Needed",
+    "description": "Permission prompts",
+    "tones": [
+      {
+        "freq": 587,
+        "start": 0,
+        "duration": 0.22,
+        "volume": 0.24
+      },
+      {
+        "freq": 494,
+        "start": 0.22,
+        "duration": 0.22,
+        "volume": 0.26
+      },
+      {
+        "freq": 523,
+        "start": 0.44,
+        "duration": 0.21,
+        "volume": 0.22
+      }
+    ]
+  },
+  "question": {
+    "name": "Question",
+    "description": "Multiple choice questions",
+    "tones": [
+      {
+        "freq": 523,
+        "start": 0,
+        "duration": 0.22,
+        "volume": 0.24
+      },
+      {
+        "freq": 659,
+        "start": 0.22,
+        "duration": 0.22,
+        "volume": 0.26
+      },
+      {
+        "freq": 784,
+        "start": 0.44,
+        "duration": 0.26,
+        "volume": 0.24
+      }
+    ]
+  },
+  "completion-normal": {
+    "name": "Completion Normal",
+    "description": "Regular completions (neutral)",
+    "tones": [
+      {
+        "freq": 440,
+        "start": 0,
+        "duration": 0.26,
+        "volume": 0.22
+      },
+      {
+        "freq": 523,
+        "start": 0.26,
+        "duration": 0.26,
+        "volume": 0.24
+      },
+      {
+        "freq": 587,
+        "start": 0.52,
+        "duration": 0.21,
+        "volume": 0.2
+      }
+    ]
+  },
+  "completion-success": {
+    "name": "Completion Success",
+    "description": "Successful completions only",
+    "tones": [
+      {
+        "freq": 523,
+        "start": 0,
+        "duration": 0.22,
+        "volume": 0.24
+      },
+      {
+        "freq": 659,
+        "start": 0.22,
+        "duration": 0.22,
+        "volume": 0.26
+      },
+      {
+        "freq": 784,
+        "start": 0.44,
+        "duration": 0.22,
+        "volume": 0.27
+      },
+      {
+        "freq": 1047,
+        "start": 0.66,
+        "duration": 0.32,
+        "volume": 0.28
+      }
+    ]
+  },
+  "completion-error": {
+    "name": "Completion Error",
+    "description": "Errors/failures",
+    "tones": [
+      {
+        "freq": 370,
+        "start": 0,
+        "duration": 0.32,
+        "volume": 0.28
+      },
+      {
+        "freq": 311,
+        "start": 0.32,
+        "duration": 0.36,
+        "volume": 0.3
+      }
+    ]
+  }
+};
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        let dragState = null; // { soundId, toneIdx, startX, startY, startFreq, startDuration, lockAxis }
+        let hoverState = null; // { soundId, toneIdx }
+        let selectedState = null; // { soundId, toneIdx } - for keyboard navigation
+
+        // Musical note utilities
+        const A4_FREQ = 440; // A4 reference frequency
+        const A4_MIDI = 69;  // A4 MIDI note number
+
+        function freqToSemitone(freq) {
+            // Convert frequency to semitone (MIDI note number)
+            return 12 * Math.log2(freq / A4_FREQ) + A4_MIDI;
+        }
+
+        function semitoneToFreq(semitone) {
+            // Convert semitone (MIDI note number) to frequency
+            return A4_FREQ * Math.pow(2, (semitone - A4_MIDI) / 12);
+        }
+
+        function snapToSemitone(freq) {
+            // Snap frequency to nearest semitone
+            const semitone = Math.round(freqToSemitone(freq));
+            return Math.round(semitoneToFreq(semitone));
+        }
+
+        function isNaturalNote(freq) {
+            // Check if frequency is a natural note (white key) vs sharp/flat (black key)
+            const semitone = Math.round(freqToSemitone(freq));
+            const noteInOctave = ((semitone % 12) + 12) % 12; // Handle negative values
+            const naturalNotes = [0, 2, 4, 5, 7, 9, 11]; // C, D, E, F, G, A, B
+            return naturalNotes.includes(noteInOctave);
+        }
+
+        const DEFAULT_SOUNDS = {
+            'user-submit': {
+                name: 'User Submit',
+                description: 'When you press enter',
+                tones: [
+                    { freq: 500, start: 0, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 600, start: 0.06, duration: 0.06, volume: 0.3, silent: false }
+                ]
+            },
+            'permission-needed': {
+                name: 'Permission Needed',
+                description: 'Permission prompts',
+                tones: [
+                    { freq: 650, start: 0, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 750, start: 0.06, duration: 0.06, volume: 0.3, silent: false },
+                    { freq: 650, start: 0.12, duration: 0.08, volume: 0.3, silent: false }
+                ]
+            },
+            'question': {
+                name: 'Question',
+                description: 'Multiple choice questions',
+                tones: [
+                    { freq: 800, start: 0, duration: 0.08, volume: 0.3, silent: false },
+                    { freq: 950, start: 0.08, duration: 0.08, volume: 0.3, silent: false }
+                ]
+            },
+            'completion-normal': {
+                name: 'Completion Normal',
+                description: 'Regular completions (neutral)',
+                tones: [
+                    { freq: 440, start: 0, duration: 0.12, volume: 0.25, silent: false }
+                ]
+            },
+            'completion-success': {
+                name: 'Completion Success',
+                description: 'Successful completions only',
+                tones: [
+                    { freq: 500, start: 0, duration: 0.07, volume: 0.3, silent: false },
+                    { freq: 650, start: 0.07, duration: 0.07, volume: 0.3, silent: false },
+                    { freq: 800, start: 0.14, duration: 0.1, volume: 0.3, silent: false }
+                ]
+            },
+            'completion-error': {
+                name: 'Completion Error',
+                description: 'Errors/failures',
+                tones: [
+                    { freq: 220, start: 0, duration: 0.35, volume: 0.3, silent: false },
+                    { freq: 233, start: 0, duration: 0.35, volume: 0.3, silent: false }
+                ]
+            }
+        };
+
+        // Load from embedded config (read-only demo)
+        let fullConfig = EMBEDDED_CONFIG; // Stores the full config including _presets
+        let presets = EMBEDDED_CONFIG._presets || {};
+
+        async function loadSoundsConfig() {
+            // Use embedded configuration
+            const config = EMBEDDED_CONFIG;
+            console.log('✓ Loaded embedded config (demo mode)');
+
+            // Store full config including presets
+            fullConfig = config;
+            presets = config._presets || {};
+
+            // Extract just the sound definitions (not _presets)
+            const sounds = {};
+            for (const soundId in config) {
+                if (!soundId.startsWith('_')) {
+                    sounds[soundId] = config[soundId];
+
+                    // Migrate old format: add 'start' field if missing
+                    let currentStart = 0;
+                    for (const tone of sounds[soundId].tones) {
+                        if (tone.start === undefined) {
+                            tone.start = currentStart;
+                            currentStart += tone.duration;
+                        }
+                    }
+                }
+            }
+
+            return sounds;
+        }
+
+        async function saveSoundsConfig() {
+            // Read-only demo - do not save
+            console.log('Demo mode: Changes are not saved');
+        }
+
+        let currentPreset = 'conversational'; // Track current preset
+        let customSounds = null; // Store custom sounds when switching away
+
+        function loadPreset(presetName, skipSave = false) {
+            if (presetName === 'custom') {
+                const desc = document.getElementById('preset-description');
+                desc.textContent = 'Your custom sound design - edit any preset to create your own.';
+
+                // Restore saved custom sounds if they exist
+                if (customSounds) {
+                    for (const soundId in customSounds) {
+                        if (soundsConfig[soundId]) {
+                            soundsConfig[soundId].tones = JSON.parse(JSON.stringify(customSounds[soundId].tones));
+                        }
+                    }
+                    currentPreset = 'custom';
+                    drawCanvas();
+                    if (!skipSave) {
+                        saveSoundsConfig();
+                    }
+                }
+                return;
+            }
+
+            // Save current custom sounds before switching to a preset
+            if (currentPreset === 'custom') {
+                customSounds = {};
+                for (const soundId in soundsConfig) {
+                    customSounds[soundId] = {
+                        name: soundsConfig[soundId].name,
+                        description: soundsConfig[soundId].description,
+                        tones: JSON.parse(JSON.stringify(soundsConfig[soundId].tones))
+                    };
+                }
+            }
+
+            const preset = presets[presetName];
+            if (!preset) {
+                console.error('Preset not found:', presetName);
+                return;
+            }
+
+            currentPreset = presetName;
+
+            // Load preset sounds into soundsConfig
+            for (const soundId in preset.sounds) {
+                if (soundsConfig[soundId]) {
+                    soundsConfig[soundId].tones = JSON.parse(JSON.stringify(preset.sounds[soundId].tones));
+                }
+            }
+
+            // Update description
+            const desc = document.getElementById('preset-description');
+            desc.textContent = preset.description;
+
+            // Save and re-render
+            if (!skipSave) {
+                saveSoundsConfig();
+            }
+            drawCanvas();
+        }
+
+        function switchToCustom() {
+            if (currentPreset !== 'custom') {
+                // Save current state as custom
+                customSounds = {};
+                for (const soundId in soundsConfig) {
+                    customSounds[soundId] = {
+                        name: soundsConfig[soundId].name,
+                        description: soundsConfig[soundId].description,
+                        tones: JSON.parse(JSON.stringify(soundsConfig[soundId].tones))
+                    };
+                }
+
+                currentPreset = 'custom';
+                const customRadio = document.querySelector('input[name="preset"][value="custom"]');
+                if (customRadio) {
+                    customRadio.checked = true;
+                }
+                const desc = document.getElementById('preset-description');
+                desc.textContent = 'Your custom sound design - edit any preset to create your own.';
+            }
+        }
+
+        let soundsConfig = JSON.parse(JSON.stringify(DEFAULT_SOUNDS));
+
+        function playSound(soundId) {
+            // Don't play if already playing
+            if (isPlaying) {
+                return;
+            }
+
+            const config = soundsConfig[soundId];
+            const now = audioContext.currentTime;
+
+            // Calculate total duration (max end time)
+            const totalDuration = Math.max(...config.tones.map(t => t.start + t.duration));
+
+            // Mark as playing
+            isPlaying = true;
+            clearTimeout(playingSoundTimeout);
+            playingSoundTimeout = setTimeout(() => {
+                isPlaying = false;
+            }, totalDuration * 1000 + 50); // Add 50ms buffer
+
+            config.tones.forEach((tone, idx) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = tone.freq;
+                oscillator.type = 'sine';
+
+                const toneStart = now + tone.start;
+                const fadeTime = Math.min(tone.duration * 0.1, 0.01);
+                gainNode.gain.setValueAtTime(0, toneStart);
+                gainNode.gain.linearRampToValueAtTime(tone.volume, toneStart + fadeTime);
+                gainNode.gain.setValueAtTime(tone.volume, toneStart + tone.duration - fadeTime);
+                gainNode.gain.linearRampToValueAtTime(0, toneStart + tone.duration);
+
+                oscillator.start(toneStart);
+                oscillator.stop(toneStart + tone.duration);
+            });
+        }
+
+        let saveTimeout = null;
+        let playSoundTimeout = null;
+        let isPlaying = false;
+        let playingSoundTimeout = null;
+
+        function updateValue(soundId, toneIdx, param, value) {
+            soundsConfig[soundId].tones[toneIdx][param] = parseFloat(value);
+            switchToCustom(); // User edited manually
+            saveSoundsConfig(); // Save to localStorage
+            drawMainCanvas(); // Redraw canvas immediately
+
+            // Auto-save with debounce
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToServer();
+            }, 500); // Wait 500ms after last change
+        }
+
+        function addTone(soundId) {
+            const tones = soundsConfig[soundId].tones;
+            // Add new tone after the last tone ends
+            const maxEnd = tones.length > 0 ? Math.max(...tones.map(t => t.start + t.duration)) : 0;
+            tones.push({ freq: 500, start: maxEnd, duration: 0.1, volume: 0.3, silent: false });
+            renderSounds();
+            saveToServer();
+        }
+
+        function removeTone(soundId, toneIdx) {
+            if (soundsConfig[soundId].tones.length > 1) {
+                soundsConfig[soundId].tones.splice(toneIdx, 1);
+                renderSounds();
+                    saveToServer();
+            }
+        }
+
+        function resetSound(soundId) {
+            soundsConfig[soundId] = JSON.parse(JSON.stringify(DEFAULT_SOUNDS[soundId]));
+            renderSounds();
+            saveToServer();
+        }
+
+        function resetAllSounds() {
+            soundsConfig = JSON.parse(JSON.stringify(DEFAULT_SOUNDS));
+            renderSounds();
+            saveToServer();
+        }
+
+        function renderSounds() {
+            const container = document.getElementById('sounds-container');
+            container.innerHTML = '';
+
+            Object.keys(soundsConfig).forEach(soundId => {
+                const config = soundsConfig[soundId];
+                const card = document.createElement('div');
+                card.className = 'sound-card';
+
+                let html = `
+                    <h2>${config.name}</h2>
+                    <div class="description">${config.description}</div>
+                `;
+
+                // Show tone information in a simpler, read-only format
+                config.tones.forEach((tone, idx) => {
+                    html += `
+                        <div style="background: #1a1a1a; padding: 8px 12px; margin: 6px 0; border-radius: 4px; display: grid; grid-template-columns: 30px repeat(3, 1fr); gap: 12px; align-items: center; font-size: 13px;">
+                            <div class="tone-num" style="font-weight: bold; color: #666;">${idx + 1}</div>
+                            <div><span style="color: #888;">Frequency:</span> <span style="color: #0099ff; font-weight: bold;">${tone.freq} Hz</span></div>
+                            <div><span style="color: #888;">Duration:</span> <span style="color: #0099ff; font-weight: bold;">${tone.duration}s</span></div>
+                            <div><span style="color: #888;">Volume:</span> <span style="color: #0099ff; font-weight: bold;">${tone.volume}</span></div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="button-group" style="margin-top: 12px;">
+                        <button class="play" onclick="playSound('${soundId}')">▶ Play Sound</button>
+                    </div>
+                `;
+
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+
+            // Draw main canvas
+            drawMainCanvas();
+        }
+
+        function drawMainCanvas() {
+            const canvas = document.getElementById('main-canvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear canvas
+            ctx.fillStyle = '#0d0d0d';
+            ctx.fillRect(0, 0, width, height);
+
+            const soundIds = Object.keys(soundsConfig);
+            const soundHeight = height / soundIds.length;
+            const labelWidth = 160;
+            const padding = 10;
+            const minFreq = 200;
+            const maxFreq = 2000;
+
+            // Logarithmic scale helper
+            const logMin = Math.log(minFreq);
+            const logMax = Math.log(maxFreq);
+            const freqToY = (freq, rowStart) => {
+                const logFreq = Math.log(freq);
+                const normalized = (logFreq - logMin) / (logMax - logMin);
+                return rowStart + soundHeight - padding - (normalized * (soundHeight - padding * 2));
+            };
+
+            soundIds.forEach((soundId, soundIdx) => {
+                const config = soundsConfig[soundId];
+                const yStart = soundIdx * soundHeight;
+
+                // Draw background
+                ctx.fillStyle = soundIdx % 2 === 0 ? '#121212' : '#0d0d0d';
+                ctx.fillRect(0, yStart, width, soundHeight);
+
+                // Draw sound label
+                ctx.fillStyle = '#0099ff';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.fillText(config.name, padding, yStart + soundHeight / 2 + 5);
+
+                // Calculate total duration (max end time)
+                const totalDuration = config.tones.length > 0
+                    ? Math.max(...config.tones.map(t => t.start + t.duration))
+                    : 0.5;
+                const availableWidth = width - labelWidth - padding * 3;
+                const pixelsPerSecond = availableWidth / Math.max(totalDuration, 0.5);
+
+                const graphStart = labelWidth + padding * 2;
+
+                // Draw frequency grid (horizontal lines) - only major markers
+                const freqMarkers = [200, 500, 1000, 2000];
+                freqMarkers.forEach(freq => {
+                    const y = freqToY(freq, yStart);
+                    ctx.strokeStyle = '#1a1a1a';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(graphStart, y);
+                    ctx.lineTo(width - padding, y);
+                    ctx.stroke();
+
+                    // Draw frequency label on all rows
+                    ctx.fillStyle = '#444';
+                    ctx.font = '8px monospace';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`${freq}`, graphStart - 5, y + 3);
+                    ctx.textAlign = 'left';
+                });
+
+                // Draw time grid (vertical lines) - only 100ms intervals
+                for (let t = 0.1; t <= 0.5; t += 0.1) {
+                    const x = graphStart + (t * pixelsPerSecond);
+                    ctx.strokeStyle = '#1a1a1a';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, yStart + padding);
+                    ctx.lineTo(x, yStart + soundHeight - padding);
+                    ctx.stroke();
+
+                    // Draw time labels on all rows
+                    ctx.fillStyle = '#444';
+                    ctx.font = '8px monospace';
+                    ctx.fillText(`${Math.round(t * 1000)}`, x - 8, yStart + padding + 8);
+                }
+
+                config.tones.forEach((tone, toneIdx) => {
+                    const toneWidth = tone.duration * pixelsPerSecond;
+                    const toneX = graphStart + (tone.start * pixelsPerSecond);
+                    const isHovered = hoverState && hoverState.soundId === soundId && hoverState.toneIdx === toneIdx;
+
+                    // Map frequency to height (logarithmic)
+                    // Draw a horizontal line at the frequency level
+                    const freqY = freqToY(tone.freq, yStart);
+
+                    // Map frequency to color
+                    const freqNormalized = (Math.log(tone.freq) - logMin) / (logMax - logMin);
+                    const hue = 200 + (freqNormalized * 80);
+
+                    // Draw filled area from frequency line to a fixed baseline
+                    const baselineHeight = 12;
+                    const barTop = freqY - baselineHeight / 2;
+                    const barBottom = freqY + baselineHeight / 2;
+
+                    // Draw the frequency indicator bar
+                    const gradient = ctx.createLinearGradient(0, barTop, 0, barBottom);
+                    if (isHovered) {
+                        gradient.addColorStop(0, `hsl(${hue}, 80%, 65%)`);
+                        gradient.addColorStop(0.5, `hsl(${hue}, 90%, 70%)`);
+                        gradient.addColorStop(1, `hsl(${hue}, 80%, 65%)`);
+                    } else {
+                        gradient.addColorStop(0, `hsl(${hue}, 70%, 45%)`);
+                        gradient.addColorStop(0.5, `hsl(${hue}, 80%, 55%)`);
+                        gradient.addColorStop(1, `hsl(${hue}, 70%, 45%)`);
+                    }
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(toneX + 1, barTop, toneWidth - 2, baselineHeight);
+
+                    // Draw border
+                    ctx.strokeStyle = isHovered ? '#0099ff' : `hsl(${hue}, 60%, 30%)`;
+                    ctx.lineWidth = isHovered ? 2 : 1;
+                    ctx.strokeRect(toneX + 1, barTop, toneWidth - 2, baselineHeight);
+
+                    // Calculate interval from first tone (needed for positioning)
+                    let intervalText = '';
+                    if (toneIdx > 0) {
+                        const firstTone = config.tones[0];
+                        const firstSemitone = Math.round(freqToSemitone(firstTone.freq));
+                        const currentSemitone = Math.round(freqToSemitone(tone.freq));
+                        const interval = currentSemitone - firstSemitone;
+                        intervalText = `${interval >= 0 ? '+' : ''}${interval}`;
+                    }
+
+                    // Draw note type indicator (natural vs sharp/flat)
+                    const isNatural = isNaturalNote(tone.freq);
+                    const indicatorX = toneX + 8;
+                    const indicatorY = freqY;
+                    const indicatorRadius = 3;
+
+                    ctx.beginPath();
+                    ctx.arc(indicatorX, indicatorY, indicatorRadius, 0, Math.PI * 2);
+                    if (isNatural) {
+                        // Natural note: white circle with border
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        ctx.strokeStyle = '#000000';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    } else {
+                        // Sharp/flat: filled black circle
+                        ctx.fillStyle = '#000000';
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+
+                    // Draw interval above the dot indicator
+                    if (intervalText && toneWidth > 40) {
+                        ctx.fillStyle = '#00ddff';
+                        ctx.font = 'bold 14px monospace';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(`${intervalText}`, indicatorX + 6, indicatorY - 8);
+                    }
+
+                    // Draw labels (only if space)
+                    if (toneWidth > 40) {
+                        ctx.textAlign = 'center';
+
+                        // Frequency above the bar
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 13px monospace';
+                        ctx.fillText(`${tone.freq}Hz`, toneX + toneWidth / 2, barTop - 8);
+
+                        // Duration below the bar
+                        ctx.fillStyle = '#bbbbbb';
+                        ctx.font = 'bold 10px monospace';
+                        ctx.fillText(`${(tone.duration * 1000).toFixed(0)}ms`, toneX + toneWidth / 2, barBottom + 14);
+                        ctx.textAlign = 'left';
+                    }
+
+                    // Show stacking indicator if multiple tones overlap
+                    const overlapping = config.tones.filter((t, i) => {
+                        return i !== toneIdx &&
+                               t.start < tone.start + tone.duration &&
+                               t.start + t.duration > tone.start;
+                    }).length;
+
+                    if (overlapping > 0 && toneWidth > 20) {
+                        ctx.fillStyle = '#ff9500';
+                        ctx.font = 'bold 10px monospace';
+                        ctx.textAlign = 'right';
+                        ctx.fillText(`×${overlapping + 1}`, toneX + toneWidth - 4, barTop + 10);
+                        ctx.textAlign = 'left';
+                    }
+                });
+
+                // Draw separator line
+                if (soundIdx < soundIds.length - 1) {
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, yStart + soundHeight);
+                    ctx.lineTo(width, yStart + soundHeight);
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function getToneAtPosition(x, y, preferredIdx = null) {
+            const canvas = document.getElementById('main-canvas');
+            const soundIds = Object.keys(soundsConfig);
+            const soundHeight = canvas.height / soundIds.length;
+            const labelWidth = 160;
+            const padding = 10;
+
+            const soundIdx = Math.floor(y / soundHeight);
+            if (soundIdx < 0 || soundIdx >= soundIds.length) return null;
+
+            const soundId = soundIds[soundIdx];
+            const config = soundsConfig[soundId];
+            const totalDuration = config.tones.length > 0
+                ? Math.max(...config.tones.map(t => t.start + t.duration))
+                : 0.5;
+            const availableWidth = canvas.width - labelWidth - padding * 3;
+            const pixelsPerSecond = availableWidth / Math.max(totalDuration, 0.5);
+
+            const graphStart = labelWidth + padding * 2;
+            const yStart = soundIdx * soundHeight;
+
+            // Logarithmic scale for frequency (same as in drawCanvas)
+            const minFreq = 200;
+            const maxFreq = 2000;
+            const logMin = Math.log(minFreq);
+            const logMax = Math.log(maxFreq);
+            const freqToY = (freq) => {
+                const logFreq = Math.log(freq);
+                const normalized = (logFreq - logMin) / (logMax - logMin);
+                return yStart + soundHeight - padding - (normalized * (soundHeight - padding * 2));
+            };
+
+            // Find all tones at this horizontal position and calculate distances
+            const matchingTones = [];
+            const baselineHeight = 12; // Same as in drawCanvas
+            for (let toneIdx = 0; toneIdx < config.tones.length; toneIdx++) {
+                const tone = config.tones[toneIdx];
+                const toneWidth = tone.duration * pixelsPerSecond;
+                const toneX = graphStart + (tone.start * pixelsPerSecond);
+
+                if (x >= toneX && x < toneX + toneWidth) {
+                    // Calculate distance from mouse to tone's rectangular bar
+                    const toneFreqY = freqToY(tone.freq);
+                    const barTop = toneFreqY - baselineHeight / 2;
+                    const barBottom = toneFreqY + baselineHeight / 2;
+
+                    // Distance from point to rectangle
+                    const dx = Math.max(toneX - x, 0, x - (toneX + toneWidth));
+                    const dy = Math.max(barTop - y, 0, y - barBottom);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    matchingTones.push({ toneIdx, distance });
+                }
+            }
+
+            if (matchingTones.length === 0) return null;
+
+            // Sort by distance (closest first)
+            matchingTones.sort((a, b) => a.distance - b.distance);
+
+            const allMatchIndices = matchingTones.map(m => m.toneIdx);
+            const closestToneIdx = matchingTones[0].toneIdx;
+
+            // If there's a preferred index in the matches and it's reasonably close, use it
+            // (within 20% of the closest distance to avoid jumping too much)
+            if (preferredIdx !== null && allMatchIndices.includes(preferredIdx)) {
+                const preferredMatch = matchingTones.find(m => m.toneIdx === preferredIdx);
+                const closestDistance = matchingTones[0].distance;
+                if (preferredMatch.distance <= closestDistance * 1.2) {
+                    return { soundId, toneIdx: preferredIdx, pixelsPerSecond, soundHeight, allMatches: allMatchIndices };
+                }
+            }
+
+            // Otherwise return the closest tone
+            return { soundId, toneIdx: closestToneIdx, pixelsPerSecond, soundHeight, allMatches: allMatchIndices };
+        }
+
+        async function saveToServer() {
+            // Read-only demo - do not save to server
+            console.log('Demo mode: Changes are not saved to server');
+        }
+
+        // Generate preset buttons dynamically from config
+        function generatePresetButtons() {
+            const container = document.getElementById('preset-buttons-container');
+            container.innerHTML = '';
+
+            // Add preset buttons from the presets object
+            for (const presetId in presets) {
+                const preset = presets[presetId];
+                const label = document.createElement('label');
+                label.className = 'preset-radio';
+                label.style.cssText = 'display: flex; align-items: center; padding: 10px; background: #1a1a1a; border: 1px solid #555; border-radius: 4px; cursor: pointer; transition: all 0.2s;';
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'preset';
+                radio.value = presetId;
+                radio.style.cssText = 'margin-right: 8px; cursor: pointer;';
+
+                const span = document.createElement('span');
+                span.style.fontSize = '14px';
+                span.textContent = preset.name;
+
+                label.appendChild(radio);
+                label.appendChild(span);
+                container.appendChild(label);
+
+                // Add event listener
+                radio.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        loadPreset(e.target.value);
+                    }
+                });
+            }
+
+            // Add "Custom" button last
+            const customLabel = document.createElement('label');
+            customLabel.className = 'preset-radio';
+            customLabel.style.cssText = 'display: flex; align-items: center; padding: 10px; background: #1a1a1a; border: 1px solid #555; border-radius: 4px; cursor: pointer; transition: all 0.2s;';
+
+            const customRadio = document.createElement('input');
+            customRadio.type = 'radio';
+            customRadio.name = 'preset';
+            customRadio.value = 'custom';
+            customRadio.style.cssText = 'margin-right: 8px; cursor: pointer;';
+
+            const customSpan = document.createElement('span');
+            customSpan.style.fontSize = '14px';
+            customSpan.textContent = 'Custom';
+
+            customLabel.appendChild(customRadio);
+            customLabel.appendChild(customSpan);
+            container.appendChild(customLabel);
+
+            // Add event listener for custom
+            customRadio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    loadPreset('custom');
+                }
+            });
+        }
+
+
+        // Simulator
+        let simulatorRunning = false;
+        let stopSimulator = false;
+
+        async function runSimulator() {
+            if (simulatorRunning) {
+                // Stop the simulator
+                stopSimulator = true;
+                return;
+            }
+
+            simulatorRunning = true;
+            stopSimulator = false;
+
+            const output = document.getElementById('simulator-output');
+            const btn = document.getElementById('simulate-btn');
+            btn.textContent = '⏹ Stop Demo';
+            btn.style.background = '#cc0044';
+
+            output.innerHTML = '';
+
+            const steps = [
+                { delay: 500, html: '<div style="color: #aaddff; background: #1a2633; padding: 6px 10px; margin-bottom: 4px; border-radius: 3px; border-left: 3px solid #0099ff;"><span style="color: #0099ff; font-weight: bold;">&gt;</span> Ready to work?</div>', sound: 'user-submit', soundLabel: 'User Submit' },
+                { delay: 800, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is thinking...</div>', sound: null },
+                { delay: 600, html: '<div style="color: #cccccc; margin-bottom: 8px;">Let\'s do it! What would you like to work on?</div>', sound: 'completion-normal', soundLabel: 'Completion Normal' },
+                { delay: 1200, html: '<div style="color: #aaddff; background: #1a2633; padding: 6px 10px; margin-bottom: 4px; border-radius: 3px; border-left: 3px solid #0099ff;"><span style="color: #0099ff; font-weight: bold;">&gt;</span> Can you add tests to my project?</div>', sound: 'user-submit', soundLabel: 'User Submit' },
+                { delay: 1000, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is thinking...</div>', sound: null },
+                { delay: 900, html: '<div style="color: #ffcc66; margin-bottom: 4px;">Which testing framework would you like to use?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;">○ Jest<br>○ Vitest<br>○ Mocha</div>', sound: 'question', soundLabel: 'Question' },
+                { delay: 1400, html: '<div style="color: #ffcc66; margin-bottom: 4px;">Which testing framework would you like to use?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;"><span style="background: #0099ff; color: #fff; padding: 2px 6px; border-radius: 2px;">● Jest</span><br>○ Vitest<br>○ Mocha</div>', sound: null, updateLast: true },
+                { delay: 900, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is working...</div>', sound: null },
+                { delay: 1100, html: '<div style="color: #ff8888; margin-bottom: 10px;">✗ Error: jest is not installed. Please run npm install jest first.</div>', sound: 'completion-error', soundLabel: 'Completion Error' },
+                { delay: 1500, html: '<div style="color: #aaddff; background: #1a2633; padding: 6px 10px; margin-bottom: 4px; border-radius: 3px; border-left: 3px solid #0099ff;"><span style="color: #0099ff; font-weight: bold;">&gt;</span> ok, install it for me</div>', sound: 'user-submit', soundLabel: 'User Submit' },
+                { delay: 800, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Claude is working...</div>', sound: null },
+                { delay: 600, html: '<div style="color: #ff9944; margin-bottom: 4px;">⚠️ Permission needed: Run npm install?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;">[ Allow ] [ Deny ] [ Allow All ]</div>', sound: 'permission-needed', soundLabel: 'Permission Needed' },
+                { delay: 800, html: '<div style="color: #ff9944; margin-bottom: 4px;">⚠️ Permission needed: Run npm install?</div><div style="color: #888; margin-left: 16px; margin-bottom: 8px;"><span style="background: #44cc44; color: #000; padding: 4px 10px; border-radius: 3px; font-weight: bold;">[ Allow ]</span> [ Deny ] [ Allow All ]</div>', sound: null, updateLast: true },
+                { delay: 1000, html: '<div style="color: #777; font-style: italic; margin-bottom: 6px;">Installing dependencies...</div>', sound: null },
+                { delay: 1200, html: '<div style="color: #88dd88; margin-bottom: 10px;">✓ Successfully installed jest and created test files</div>', sound: 'completion-success', soundLabel: 'Completion Success' },
+                { delay: 1500, html: '<div style="color: #666; margin-top: 12px; padding-top: 12px; border-top: 1px solid #222;"><br>Demo complete! Try different presets to hear the differences.</div>', sound: null }
+            ];
+
+            for (const step of steps) {
+                if (stopSimulator) {
+                    const stoppedMsg = document.createElement('div');
+                    stoppedMsg.innerHTML = '<div style="color: #ff9500; margin-top: 12px;">Demo stopped.</div>';
+                    output.appendChild(stoppedMsg);
+                    break;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, step.delay));
+
+                if (stopSimulator) {
+                    const stoppedMsg = document.createElement('div');
+                    stoppedMsg.innerHTML = '<div style="color: #ff9500; margin-top: 12px;">Demo stopped.</div>';
+                    output.appendChild(stoppedMsg);
+                    break;
+                }
+
+                if (step.updateLast) {
+                    // Update the last row instead of creating a new one
+                    const lastRow = output.lastElementChild;
+                    if (lastRow && lastRow.children.length >= 2) {
+                        // The second child (index 1) is the message column
+                        const messageColumn = lastRow.children[1];
+                        if (messageColumn) {
+                            messageColumn.innerHTML = step.html;
+                        }
+                    }
+                } else {
+                    // Create row container with two columns
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display: grid; grid-template-columns: 170px 1fr; gap: 12px; align-items: start;';
+
+                    // Left column: sound label (or empty space)
+                    const soundColumn = document.createElement('div');
+                    soundColumn.style.cssText = 'text-align: right; padding-right: 8px;';
+
+                    if (step.sound) {
+                        const soundIndicator = document.createElement('div');
+                        soundIndicator.style.cssText = 'color: #ff9500; font-size: 10px; padding: 4px 8px; background: #ff950022; border-right: 2px solid #ff9500; display: inline-block; border-radius: 3px; cursor: pointer; transition: all 0.2s;';
+                        soundIndicator.innerHTML = `🔊 ${step.soundLabel}`;
+                        soundIndicator.title = 'Click to replay this sound';
+
+                        // Capture the sound ID in a closure
+                        const soundId = step.sound;
+                        soundIndicator.addEventListener('click', () => {
+                            playSound(soundId);
+                        });
+                        soundIndicator.addEventListener('mouseenter', () => {
+                            soundIndicator.style.background = '#ff950044';
+                            soundIndicator.style.borderRightWidth = '3px';
+                        });
+                        soundIndicator.addEventListener('mouseleave', () => {
+                            soundIndicator.style.background = '#ff950022';
+                            soundIndicator.style.borderRightWidth = '2px';
+                        });
+
+                        soundColumn.appendChild(soundIndicator);
+                        playSound(step.sound);
+                    }
+
+                    // Right column: message content
+                    const messageColumn = document.createElement('div');
+                    messageColumn.innerHTML = step.html;
+
+                    row.appendChild(soundColumn);
+                    row.appendChild(messageColumn);
+                    output.appendChild(row);
+                }
+
+                output.scrollTop = output.scrollHeight;
+            }
+
+            simulatorRunning = false;
+            btn.textContent = '▶ Play Demo';
+            btn.style.background = '#0099ff';
+        }
+
+        document.getElementById('simulate-btn').addEventListener('click', runSimulator);
+
+        // Initial render - load config then render
+        (async () => {
+            soundsConfig = await loadSoundsConfig();
+
+            // Generate preset buttons after config is loaded
+            generatePresetButtons();
+
+            renderSounds();
+
+            // Set first preset as default (or conversational if it exists)
+            const firstPresetId = Object.keys(presets)[0] || 'conversational';
+            const defaultRadio = document.querySelector(`input[name="preset"][value="${firstPresetId}"]`);
+            if (defaultRadio) {
+                defaultRadio.checked = true;
+            }
+            const desc = document.getElementById('preset-description');
+            if (presets[firstPresetId]) {
+                desc.textContent = presets[firstPresetId].description;
+            }
+        })();
+
+        // Canvas interaction - READ-ONLY DEMO (disabled dragging)
+        const mainCanvas = document.getElementById('main-canvas');
+
+        let lastClickPos = null;
+        let lastClickTime = 0;
+
+        // Disabled for read-only demo
+        // mainCanvas.addEventListener('mousedown', (e) => { ... });
+
+        // Hover state is still enabled for visual feedback
+        mainCanvas.addEventListener('mousemove', (e) => {
+            const rect = mainCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (mainCanvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (mainCanvas.height / rect.height);
+
+            // Update hover state for visual feedback only
+            if (!dragState) {
+                const preferredIdx = hoverState ? hoverState.toneIdx : null;
+                const tone = getToneAtPosition(x, y, preferredIdx);
+                if (tone && (!hoverState || hoverState.soundId !== tone.soundId || hoverState.toneIdx !== tone.toneIdx)) {
+                    hoverState = { soundId: tone.soundId, toneIdx: tone.toneIdx };
+                    drawMainCanvas();
+                } else if (!tone && hoverState) {
+                    hoverState = null;
+                    drawMainCanvas();
+                }
+            }
+        });
+
+        // Dragging disabled for read-only demo
+        // document.addEventListener('mousemove', (e) => { ... });
+        // document.addEventListener('mouseup', () => { ... });
+
+        // Get all tones in order for Tab navigation
+        function getAllTones() {
+            const allTones = [];
+            for (const soundId of Object.keys(soundsConfig)) {
+                const tones = soundsConfig[soundId].tones;
+                for (let toneIdx = 0; toneIdx < tones.length; toneIdx++) {
+                    allTones.push({ soundId, toneIdx });
+                }
+            }
+            return allTones;
+        }
+
+        // Keyboard controls disabled for read-only demo
+        // document.addEventListener('keydown', (e) => { ... });
+    </script>
+</body>
+</html>
