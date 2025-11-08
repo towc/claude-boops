@@ -18,7 +18,6 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 - May contain bugs, security issues, or unexpected behavior
 - Modifies your Claude Code settings.json (backups are created)
 - Runs a local server on port 8765
-- `/boops:hide-hooks` modifies the Claude binary itself (unsupported by Anthropic)
 
 **If you encounter issues:** Check `/tmp/claude-sound.log` or open an issue on GitHub.
 
@@ -67,7 +66,10 @@ The plugin works immediately after installation - sounds are generated dynamical
 Once installed, you have access to these slash commands:
 
 - `/boops:settings` - Open the visual sound editor
-- `/boops:hide-hooks` - Patch Claude to hide "hook succeeded" messages (use at your own risk)
+
+## Companion Plugins
+
+Looking to clean up hook messages? Check out **[claude-hide-hooks](https://github.com/towc/claude-hide-hooks)** - a separate plugin that conditionally hides successful hook execution messages while keeping errors visible.
 
 ## Sounds
 
@@ -138,22 +140,6 @@ The editor shows:
 - Color-coded bars (color indicates frequency)
 - Frequency and duration labels on each tone
 
-## Hiding Hook Messages
-
-If you want to suppress the "hook succeeded: Success" messages that appear in Claude Code:
-
-```bash
-/boops:hide-hooks
-```
-
-This command will:
-1. Find your Claude executable (resolving any symlinks)
-2. Create a backup file (e.g., `claude.bak.js`)
-3. Patch the code to hide "hook succeeded" messages
-4. Show you how to revert if needed
-
-**⚠️ Warning:** This modifies the Claude binary and is unsupported by Anthropic. Use at your own risk. Future Claude updates will overwrite this patch.
-
 ## Sharing Configurations
 
 Share your `config.json` file with friends! It contains all the tone parameters (frequency, duration, volume) for each sound.
@@ -191,14 +177,12 @@ claude-boops/
 │   ├── plugin.json            # Plugin metadata
 │   └── marketplace.json       # Marketplace listing
 ├── commands/
-│   ├── settings.md            # /boops:settings command
-│   └── hide-hooks.md          # /boops:hide-hooks command
+│   └── settings.md            # /boops:settings command
 ├── hooks/
 │   └── hooks.json             # Hook definitions (auto-installed)
 ├── README.md                  # This file
 ├── setup.sh                   # Manual installation script
 ├── settings.sh                # Opens editor and starts server
-├── hide-hooks.js              # Patches Claude to hide hook messages
 ├── config.json                # Sound configuration
 ├── sound-tuner.html           # Visual editor
 ├── sound-server.js            # Backend for generating WAVs
