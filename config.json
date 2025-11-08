@@ -1,4 +1,136 @@
 {
+  "user-submit": {
+    "name": "User Submit",
+    "description": "When you press enter",
+    "tones": [
+      {
+        "freq": 659,
+        "start": 0,
+        "duration": 0.26,
+        "volume": 0.22
+      }
+    ]
+  },
+  "permission-needed": {
+    "name": "Permission Needed",
+    "description": "Permission prompts",
+    "tones": [
+      {
+        "freq": 587,
+        "start": 0,
+        "duration": 0.22,
+        "volume": 0.24
+      },
+      {
+        "freq": 494,
+        "start": 0.22,
+        "duration": 0.22,
+        "volume": 0.26
+      },
+      {
+        "freq": 523,
+        "start": 0.44,
+        "duration": 0.21,
+        "volume": 0.22
+      }
+    ]
+  },
+  "question": {
+    "name": "Question",
+    "description": "Multiple choice questions",
+    "tones": [
+      {
+        "freq": 523,
+        "start": 0,
+        "duration": 0.22,
+        "volume": 0.24
+      },
+      {
+        "freq": 659,
+        "start": 0.22,
+        "duration": 0.22,
+        "volume": 0.26
+      },
+      {
+        "freq": 784,
+        "start": 0.44,
+        "duration": 0.26,
+        "volume": 0.24
+      }
+    ]
+  },
+  "completion-normal": {
+    "name": "Completion Normal",
+    "description": "Regular completions (neutral)",
+    "tones": [
+      {
+        "freq": 440,
+        "start": 0,
+        "duration": 0.26,
+        "volume": 0.22
+      },
+      {
+        "freq": 523,
+        "start": 0.26,
+        "duration": 0.26,
+        "volume": 0.24
+      },
+      {
+        "freq": 587,
+        "start": 0.52,
+        "duration": 0.21,
+        "volume": 0.2
+      }
+    ]
+  },
+  "completion-success": {
+    "name": "Completion Success",
+    "description": "Successful completions only",
+    "tones": [
+      {
+        "freq": 523,
+        "start": 0,
+        "duration": 0.22,
+        "volume": 0.24
+      },
+      {
+        "freq": 659,
+        "start": 0.22,
+        "duration": 0.22,
+        "volume": 0.26
+      },
+      {
+        "freq": 784,
+        "start": 0.44,
+        "duration": 0.22,
+        "volume": 0.27
+      },
+      {
+        "freq": 1047,
+        "start": 0.66,
+        "duration": 0.32,
+        "volume": 0.28
+      }
+    ]
+  },
+  "completion-error": {
+    "name": "Completion Error",
+    "description": "Errors/failures",
+    "tones": [
+      {
+        "freq": 370,
+        "start": 0,
+        "duration": 0.32,
+        "volume": 0.28
+      },
+      {
+        "freq": 311,
+        "start": 0.32,
+        "duration": 0.36,
+        "volume": 0.3
+      }
+    ]
+  },
   "_presets": {
     "conversational": {
       "name": "Conversational",
@@ -109,7 +241,7 @@
         "user-submit": {
           "tones": [
             {
-              "freq": 880,
+              "freq": 523,
               "start": 0,
               "duration": 0.14,
               "volume": 0.15
@@ -119,13 +251,13 @@
         "permission-needed": {
           "tones": [
             {
-              "freq": 1047,
+              "freq": 623,
               "start": 0,
               "duration": 0.18,
               "volume": 0.18
             },
             {
-              "freq": 880,
+              "freq": 523,
               "start": 0.18,
               "duration": 0.18,
               "volume": 0.16
@@ -135,13 +267,13 @@
         "question": {
           "tones": [
             {
-              "freq": 880,
+              "freq": 523,
               "start": 0,
               "duration": 0.18,
               "volume": 0.18
             },
             {
-              "freq": 1047,
+              "freq": 623,
               "start": 0.18,
               "duration": 0.18,
               "volume": 0.16
@@ -151,13 +283,13 @@
         "completion-normal": {
           "tones": [
             {
-              "freq": 784,
+              "freq": 466,
               "start": 0,
               "duration": 0.21,
               "volume": 0.16
             },
             {
-              "freq": 880,
+              "freq": 523,
               "start": 0.21,
               "duration": 0.21,
               "volume": 0.14
@@ -167,19 +299,19 @@
         "completion-success": {
           "tones": [
             {
-              "freq": 880,
+              "freq": 523,
               "start": 0,
               "duration": 0.18,
               "volume": 0.16
             },
             {
-              "freq": 1047,
+              "freq": 623,
               "start": 0.18,
               "duration": 0.18,
               "volume": 0.17
             },
             {
-              "freq": 1319,
+              "freq": 785,
               "start": 0.36,
               "duration": 0.21,
               "volume": 0.18
@@ -189,13 +321,13 @@
         "completion-error": {
           "tones": [
             {
-              "freq": 587,
+              "freq": 349,
               "start": 0,
               "duration": 0.26,
               "volume": 0.22
             },
             {
-              "freq": 494,
+              "freq": 294,
               "start": 0.26,
               "duration": 0.29,
               "volume": 0.24
@@ -1260,137 +1392,5 @@
         }
       }
     }
-  },
-  "user-submit": {
-    "name": "User Submit",
-    "description": "When you press enter",
-    "tones": [
-      {
-        "freq": 659,
-        "start": 0,
-        "duration": 0.26,
-        "volume": 0.22
-      }
-    ]
-  },
-  "permission-needed": {
-    "name": "Permission Needed",
-    "description": "Permission prompts",
-    "tones": [
-      {
-        "freq": 587,
-        "start": 0,
-        "duration": 0.22,
-        "volume": 0.24
-      },
-      {
-        "freq": 494,
-        "start": 0.22,
-        "duration": 0.22,
-        "volume": 0.26
-      },
-      {
-        "freq": 523,
-        "start": 0.44,
-        "duration": 0.21,
-        "volume": 0.22
-      }
-    ]
-  },
-  "question": {
-    "name": "Question",
-    "description": "Multiple choice questions",
-    "tones": [
-      {
-        "freq": 523,
-        "start": 0,
-        "duration": 0.22,
-        "volume": 0.24
-      },
-      {
-        "freq": 659,
-        "start": 0.22,
-        "duration": 0.22,
-        "volume": 0.26
-      },
-      {
-        "freq": 784,
-        "start": 0.44,
-        "duration": 0.26,
-        "volume": 0.24
-      }
-    ]
-  },
-  "completion-normal": {
-    "name": "Completion Normal",
-    "description": "Regular completions (neutral)",
-    "tones": [
-      {
-        "freq": 440,
-        "start": 0,
-        "duration": 0.26,
-        "volume": 0.22
-      },
-      {
-        "freq": 523,
-        "start": 0.26,
-        "duration": 0.26,
-        "volume": 0.24
-      },
-      {
-        "freq": 587,
-        "start": 0.52,
-        "duration": 0.21,
-        "volume": 0.2
-      }
-    ]
-  },
-  "completion-success": {
-    "name": "Completion Success",
-    "description": "Successful completions only",
-    "tones": [
-      {
-        "freq": 523,
-        "start": 0,
-        "duration": 0.22,
-        "volume": 0.24
-      },
-      {
-        "freq": 659,
-        "start": 0.22,
-        "duration": 0.22,
-        "volume": 0.26
-      },
-      {
-        "freq": 784,
-        "start": 0.44,
-        "duration": 0.22,
-        "volume": 0.27
-      },
-      {
-        "freq": 1047,
-        "start": 0.66,
-        "duration": 0.32,
-        "volume": 0.28
-      }
-    ]
-  },
-  "completion-error": {
-    "name": "Completion Error",
-    "description": "Errors/failures",
-    "tones": [
-      {
-        "freq": 370,
-        "start": 0,
-        "duration": 0.32,
-        "volume": 0.28
-      },
-      {
-        "freq": 311,
-        "start": 0.32,
-        "duration": 0.36,
-        "volume": 0.3
-      }
-    ]
   }
 }

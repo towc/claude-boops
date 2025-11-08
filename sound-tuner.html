@@ -405,6 +405,7 @@
                         }
                     }
                     currentPreset = 'custom';
+                    localStorage.setItem('claude-boops-preset', 'custom');
                     drawCanvas();
                     if (!skipSave) {
                         saveSoundsConfig();
@@ -432,6 +433,7 @@
             }
 
             currentPreset = presetName;
+            localStorage.setItem('claude-boops-preset', presetName);
 
             // Load preset sounds into soundsConfig
             for (const soundId in preset.sounds) {
@@ -464,6 +466,7 @@
                 }
 
                 currentPreset = 'custom';
+                localStorage.setItem('claude-boops-preset', 'custom');
                 const customRadio = document.querySelector('input[name="preset"][value="custom"]');
                 if (customRadio) {
                     customRadio.checked = true;
@@ -1266,15 +1269,25 @@
 
             renderSounds();
 
-            // Set first preset as default (or conversational if it exists)
-            const firstPresetId = Object.keys(presets)[0] || 'conversational';
-            const defaultRadio = document.querySelector(`input[name="preset"][value="${firstPresetId}"]`);
+            // Load preset from localStorage, or default to first preset
+            const savedPreset = localStorage.getItem('claude-boops-preset');
+            let presetToLoad = savedPreset;
+
+            // If no saved preset or saved preset doesn't exist, use first available preset
+            if (!presetToLoad || (!presets[presetToLoad] && presetToLoad !== 'custom')) {
+                presetToLoad = Object.keys(presets)[0] || 'conversational';
+            }
+
+            currentPreset = presetToLoad;
+            const defaultRadio = document.querySelector(`input[name="preset"][value="${presetToLoad}"]`);
             if (defaultRadio) {
                 defaultRadio.checked = true;
             }
             const desc = document.getElementById('preset-description');
-            if (presets[firstPresetId]) {
-                desc.textContent = presets[firstPresetId].description;
+            if (presetToLoad === 'custom') {
+                desc.textContent = 'Your custom sound design - edit any preset to create your own.';
+            } else if (presets[presetToLoad]) {
+                desc.textContent = presets[presetToLoad].description;
             }
         })();
 
