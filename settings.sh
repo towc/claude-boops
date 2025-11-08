@@ -21,13 +21,13 @@ fi
 cd "$BOOPS_DIR"
 
 # Check if server is already running and kill it
-if lsof -Pi :80075 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
-    echo "⚠️  Stopping existing server on port 80075..."
+if lsof -Pi :8007 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
+    echo "⚠️  Stopping existing server on port 8007..."
     pkill -f "node.*claude-boops-sounds-server.js" 2>/dev/null || true
     sleep 0.5
 fi
 
-echo "🚀 Starting sound server on port 80075..."
+echo "🚀 Starting sound server on port 8007..."
 echo "   Use /boops:stop to stop the server when finished"
 echo ""
 
@@ -39,10 +39,10 @@ SERVER_PID=$!
 sleep 1
 
 # Open the tuner from the server
-echo "🎨 Opening sound tuner at http://localhost:80075"
-xdg-open "http://localhost:80075" 2>/dev/null || \
-    open "http://localhost:80075" 2>/dev/null || \
-    echo "   Please open: http://localhost:80075 in your browser"
+echo "🎨 Opening sound tuner at http://localhost:8007"
+xdg-open "http://localhost:8007" 2>/dev/null || \
+    open "http://localhost:8007" 2>/dev/null || \
+    echo "   Please open: http://localhost:8007 in your browser"
 
 # Wait for server process
 wait $SERVER_PID
