@@ -6,7 +6,7 @@ const path = require('path');
 // Use the directory where this script is located
 const SOUNDS_DIR = __dirname;
 const CONFIG_FILE = path.join(SOUNDS_DIR, 'config.json');
-const PORT = 8765;
+const PORT = 80075; // BOOPS!
 
 const server = http.createServer((req, res) => {
   // CORS headers

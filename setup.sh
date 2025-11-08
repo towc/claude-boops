@@ -107,10 +107,10 @@ cd "$INSTALL_DIR"
     SERVER_PID=$!
     sleep 2
 
-    if curl -s -X POST http://localhost:8765/update-sounds >/dev/null 2>&1; then
+    if curl -s -X POST http://localhost:80075/update-sounds >/dev/null 2>&1; then
         echo "   ✅ Sound files generated successfully"
     else
-        echo "   ⚠️  Could not auto-generate sound files (port 8765 may be in use)"
+        echo "   ⚠️  Could not auto-generate sound files (port 80075 may be in use)"
         echo "   Run '~/.claude/boops/settings.sh' to generate them manually"
     fi
 
