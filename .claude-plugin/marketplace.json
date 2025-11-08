@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "claude-boops",
+      "name": "boops",
       "source": "./",
       "description": "Gentle audio notifications for Claude Code",
       "version": "1.0.0",

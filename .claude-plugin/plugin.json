@@ -1,5 +1,5 @@
 {
-  "name": "claude-boops",
+  "name": "boops",
   "version": "1.0.0",
   "description": "Gentle audio notifications for Claude Code - plays distinctive sounds when Claude finishes processing or needs your input",
   "author": {
