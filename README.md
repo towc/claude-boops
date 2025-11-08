@@ -34,21 +34,37 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 
 ## Quick Start
 
-### Via Marketplace (Recommended)
+### Recommended: Full Setup with Hide-Hooks
 
-First, add the marketplace:
+For the best experience, install both `boops` (sound feedback) and `hide-hooks` (clean up hook messages):
+
+```bash
+# Add the marketplace
+claude plugin marketplace add towc/claude-marketplace
+
+# Install boops for sound feedback
+claude plugin install boops
+
+# Install hide-hooks to clean up "hook succeeded" messages
+claude plugin install hide-hooks
+
+# After Claude restarts, apply the hide-hooks patch
+/hide-hooks:patch
+
+# Restart Claude one more time to see the changes
+```
+
+**Why hide-hooks?** The boops plugin uses hooks which generate "hook succeeded: Success" messages in the terminal. These messages clutter your screen and can be distracting. The hide-hooks plugin removes these messages while keeping the sound feedback working perfectly.
+
+### Just Boops (Not Recommended)
+
+If you only want sound feedback without hiding hook messages:
 
 ```bash
 claude plugin marketplace add towc/claude-marketplace
-```
-
-Then install the plugin:
-
-```bash
 claude plugin install boops
+# Restart Claude - sounds will play but you'll see hook messages
 ```
-
-Restart Claude Code and sounds will start playing automatically!
 
 ### Direct Installation (Alternative)
 
@@ -69,12 +85,13 @@ Once installed, you have access to these slash commands:
 
 ## Companion Plugins
 
-Looking to clean up hook messages? Check out **[hide-hooks](https://github.com/towc/claude-hide-hooks)** - a separate plugin that conditionally hides successful hook execution messages while keeping errors visible.
+### hide-hooks (Strongly Recommended)
 
-Install it from the same marketplace:
-```bash
-claude plugin install hide-hooks
-```
+Since boops uses hooks, you'll see "hook succeeded: Success" messages every time you interact with Claude. These messages are verbose and distracting.
+
+**Solution:** Install **[hide-hooks](https://github.com/towc/claude-hide-hooks)** to remove these messages while keeping your sound feedback working perfectly.
+
+See the [Quick Start](#quick-start) section above for the complete installation commands.
 
 ## Sounds
 
