@@ -34,30 +34,30 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 
 ## Quick Start
 
-### Easy Installation (Recommended)
+### Via Marketplace (Recommended)
 
-Install as a Claude Code plugin:
-
-```bash
-# Add the marketplace
-/plugin marketplace add towc/claude-boops
-
-# Install the plugin (automatically enabled)
-/plugin install boops
-```
-
-Then restart Claude Code!
-
-### Manual Installation (Alternative)
-
-If you prefer manual installation:
+First, add the marketplace:
 
 ```bash
-git clone https://github.com/towc/claude-boops.git ~/.claude/boops
-~/.claude/boops/setup.sh
+claude plugin marketplace add towc/claude-marketplace
 ```
 
-Then restart Claude Code!
+Then install the plugin:
+
+```bash
+claude plugin install boops
+```
+
+Restart Claude Code and sounds will start playing automatically!
+
+### Direct Installation (Alternative)
+
+```bash
+cd ~/.claude/plugins/marketplaces/
+git clone https://github.com/towc/claude-boops.git
+```
+
+Restart Claude Code to load the plugin.
 
 The plugin works immediately after installation - sounds are generated dynamically from config.json. You can customize the sounds by editing config.json directly or using the visual editor (see Customizing Sounds section).
 
@@ -69,7 +69,12 @@ Once installed, you have access to these slash commands:
 
 ## Companion Plugins
 
-Looking to clean up hook messages? Check out **[claude-hide-hooks](https://github.com/towc/claude-hide-hooks)** - a separate plugin that conditionally hides successful hook execution messages while keeping errors visible.
+Looking to clean up hook messages? Check out **[hide-hooks](https://github.com/towc/claude-hide-hooks)** - a separate plugin that conditionally hides successful hook execution messages while keeping errors visible.
+
+Install it from the same marketplace:
+```bash
+claude plugin install hide-hooks
+```
 
 ## Sounds
 
