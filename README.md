@@ -36,7 +36,7 @@ Install as a Claude Code plugin:
 /plugin marketplace add towc/claude-boops
 
 # Install the plugin (automatically enabled)
-/plugin install claude-boops
+/plugin install boops
 ```
 
 Then restart Claude Code!
@@ -53,6 +53,13 @@ git clone https://github.com/towc/claude-boops.git ~/.claude/boops
 Then restart Claude Code!
 
 The plugin works immediately after installation - sounds are generated dynamically from config.json. You can customize the sounds by editing config.json directly or using the visual editor (see Customizing Sounds section).
+
+## Commands
+
+Once installed, you have access to these slash commands:
+
+- `/boops:settings` - Open the visual sound editor
+- `/boops:hide-hooks` - Patch Claude to hide "hook succeeded" messages (use at your own risk)
 
 ## Sounds
 
@@ -102,7 +109,7 @@ Example with generated tones:
 
 Use the interactive visual editor to design sounds:
 
-**If installed as a plugin:** Type `/claude-boops:settings` in Claude Code to launch the editor
+**If installed as a plugin:** Type `/boops:settings` in Claude Code to launch the editor
 
 **If installed manually:** Run `~/.claude/boops/settings.sh`
 
@@ -122,6 +129,22 @@ The editor shows:
 - Grid lines for time (100ms intervals)
 - Color-coded bars (color indicates frequency)
 - Frequency and duration labels on each tone
+
+## Hiding Hook Messages
+
+If you want to suppress the "hook succeeded: Success" messages that appear in Claude Code:
+
+```bash
+/boops:hide-hooks
+```
+
+This command will:
+1. Find your Claude executable (resolving any symlinks)
+2. Create a backup file (e.g., `claude.bak.js`)
+3. Patch the code to hide "hook succeeded" messages
+4. Show you how to revert if needed
+
+**⚠️ Warning:** This modifies the Claude binary and is unsupported by Anthropic. Use at your own risk. Future Claude updates will overwrite this patch.
 
 ## Sharing Configurations
 
@@ -160,12 +183,14 @@ claude-boops/
 │   ├── plugin.json            # Plugin metadata
 │   └── marketplace.json       # Marketplace listing
 ├── commands/
-│   └── settings.md            # /settings command for customization
+│   ├── settings.md            # /boops:settings command
+│   └── hide-hooks.md          # /boops:hide-hooks command
 ├── hooks/
 │   └── hooks.json             # Hook definitions (auto-installed)
 ├── README.md                  # This file
 ├── setup.sh                   # Manual installation script
 ├── settings.sh                # Opens editor and starts server
+├── hide-hooks.js              # Patches Claude to hide hook messages
 ├── config.json                # Sound configuration
 ├── sound-tuner.html           # Visual editor
 ├── sound-server.js            # Backend for generating WAVs
@@ -197,8 +222,8 @@ claude-boops/
 ### If Installed as Plugin
 
 ```bash
-/plugin disable claude-boops
-/plugin uninstall claude-boops
+/plugin disable boops
+/plugin uninstall boops
 ```
 
 ### If Installed Manually
