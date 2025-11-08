@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "Gentle audio notifications for Claude Code - plays distinctive sounds when Claude finishes processing or needs your input",
   "author": {
-    "name": "towc"
+    "name": "towc",
+    "url": "https://github.com/towc"
   },
-  "repository": "https://github.com/towc/claude-boops"
+  "repository": "https://github.com/towc/claude-boops",
+  "commands": {
+    "settings": {
+      "description": "Open the visual sound editor",
+      "source": "./commands/settings.md"
+    }
+  }
 }
