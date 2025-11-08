@@ -200,7 +200,7 @@ claude-boops/
 ├── settings.sh                # Opens editor and starts server
 ├── config.json                # Sound configuration
 ├── sound-tuner.html           # Visual editor
-├── sound-server.js            # Backend for generating WAVs
+├── claude-boops-sounds-server.js  # Backend for generating WAVs
 ├── smart-submit.sh            # Detects question answers
 ├── smart-notification.sh      # Handles permission prompts
 ├── smart-stop.sh              # Detects success vs error
@@ -220,7 +220,7 @@ claude-boops/
 - Check Node.js is installed: `node --version`
 
 **Sounds not saving?**
-- Ensure sound-server.js is running
+- Ensure claude-boops-sounds-server.js is running
 - Check browser console (F12) for errors
 - Verify you clicked "Generate Sound Files" button
 

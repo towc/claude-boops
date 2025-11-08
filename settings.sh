@@ -11,10 +11,10 @@ echo "🔊 Claude Boops - Sound Editor"
 echo "=============================="
 echo ""
 
-# Check if sound-server.js exists in the boops directory
-if [ ! -f "$BOOPS_DIR/sound-server.js" ]; then
+# Check if claude-boops-sounds-server.js exists in the boops directory
+if [ ! -f "$BOOPS_DIR/claude-boops-sounds-server.js" ]; then
     echo "❌ Error: Claude Boops not properly installed"
-    echo "   Missing sound-server.js in $BOOPS_DIR"
+    echo "   Missing claude-boops-sounds-server.js in $BOOPS_DIR"
     exit 1
 fi
 
@@ -23,7 +23,7 @@ cd "$BOOPS_DIR"
 # Check if server is already running and kill it
 if lsof -Pi :80075 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
     echo "⚠️  Stopping existing server on port 80075..."
-    pkill -f "node.*sound-server.js" 2>/dev/null || true
+    pkill -f "node.*claude-boops-sounds-server.js" 2>/dev/null || true
     sleep 0.5
 fi
 
@@ -32,7 +32,7 @@ echo "   Use /boops:stop to stop the server when finished"
 echo ""
 
 # Run server in foreground - Ctrl+C will naturally kill it
-node sound-server.js &
+node claude-boops-sounds-server.js &
 SERVER_PID=$!
 
 # Wait for server to start

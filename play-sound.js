@@ -10,7 +10,7 @@ const CONFIG_FILE = path.join(PLUGIN_DIR, 'config.json');
 const LOCK_FILE = '/tmp/claude-sound.lock';
 const LOG_FILE = '/tmp/claude-sound.log';
 
-// WAV file generator (same as sound-server.js)
+// WAV file generator (same as claude-boops-sounds-server.js)
 function generateWAV(frequencies, durations, volumes, sampleRate = 44100) {
   const channels = 1;
   const bitsPerSample = 16;

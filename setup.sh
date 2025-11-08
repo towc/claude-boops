@@ -103,7 +103,7 @@ cd "$INSTALL_DIR"
 
 # Try to generate sounds, but don't fail if server is already running
 (
-    node sound-server.js >/dev/null 2>&1 &
+    node claude-boops-sounds-server.js >/dev/null 2>&1 &
     SERVER_PID=$!
     sleep 2
 
