@@ -66,16 +66,6 @@ claude plugin install boops
 # Restart Claude - sounds will play but you'll see hook messages
 ```
 
-### Direct Installation (Alternative)
-
-```bash
-cd ~/.claude/plugins/marketplaces/
-git clone https://github.com/towc/claude-boops.git
-```
-
-Restart Claude Code to load the plugin.
-
-The plugin works immediately after installation - sounds are generated dynamically from config.json. You can customize the sounds by editing config.json directly or using the visual editor (see Customizing Sounds section).
 
 ## Commands
 
