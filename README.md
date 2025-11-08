@@ -6,11 +6,17 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 
 **This project was entirely vibecoded with Claude and is provided as-is.** Use at your own risk!
 
-- All code was generated through conversational AI development
+- All code was generated through conversational AI development **with significant human guidance**
+  - Claude initially couldn't figure out how to make plugins
+  - Claude couldn't debug the sound issues independently
+  - Claude couldn't work out how to patch the hook messages
+  - A human had to guide Claude through these challenges
+- **Not all code has been fully reviewed by the human** - there may be issues that were missed
 - No formal testing or QA process
 - May contain bugs, security issues, or unexpected behavior
 - Modifies your Claude Code settings.json (backups are created)
 - Runs a local server on port 8765
+- `/boops:hide-hooks` modifies the Claude binary itself (unsupported by Anthropic)
 
 **If you encounter issues:** Check `/tmp/claude-sound.log` or open an issue on GitHub.
 
