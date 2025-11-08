@@ -17,7 +17,7 @@ Sound notifications for [Claude Code](https://claude.com/claude-code) - Get audi
 - No formal testing or QA process
 - May contain bugs, security issues, or unexpected behavior
 - Modifies your Claude Code settings.json (backups are created)
-- Runs a local server on port 80075
+- Runs a local server on port 8007
 
 **If you encounter issues:** Check `/tmp/claude-sound.log` or open an issue on GitHub.
 
@@ -216,7 +216,7 @@ claude-boops/
 - Check logs: `tail -f /tmp/claude-sound.log`
 
 **Sound server won't start?**
-- Make sure port 80075 is available: `lsof -i :80075`
+- Make sure port 8007 is available: `lsof -i :8007`
 - Check Node.js is installed: `node --version`
 
 **Sounds not saving?**

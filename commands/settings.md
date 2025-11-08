@@ -5,7 +5,7 @@ description: Open the Claude Boops sound editor to customize notification sounds
 Opening the Claude Boops sound editor...
 
 This will:
-1. Start the sound server on port 80075
+1. Start the sound server on port 8007
 2. Open the visual editor in your browser
 3. Allow you to customize frequency, duration, and volume for each sound
 

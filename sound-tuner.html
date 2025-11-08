@@ -13,7 +13,7 @@
     - Auto-saves to config.json
 
     Requirements:
-    - claude-boops-sounds-server.js running on port 80075
+    - claude-boops-sounds-server.js running on port 8007
 
     Usage:
     1. Start server: node claude-boops-sounds-server.js
@@ -319,7 +319,7 @@
 
         async function loadSoundsConfig() {
             try {
-                const response = await fetch('http://localhost:80075/config');
+                const response = await fetch('http://localhost:8007/config');
                 if (response.ok) {
                     const config = await response.json();
                     console.log('✓ Loaded config from ~/.claude/sounds/config.json');
@@ -361,7 +361,7 @@
                     ...soundsConfig
                 };
 
-                const response = await fetch('http://localhost:80075/config', {
+                const response = await fetch('http://localhost:8007/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(configToSave),
@@ -911,7 +911,7 @@
         async function saveToServer() {
             // Save config.json only (no WAV generation - sounds are generated dynamically)
             try {
-                await fetch('http://localhost:80075/config', {
+                await fetch('http://localhost:8007/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(soundsConfig),
@@ -943,7 +943,7 @@
 
         async function checkConnection() {
             try {
-                const response = await fetch('http://localhost:80075/config', {
+                const response = await fetch('http://localhost:8007/config', {
                     method: 'GET',
                     signal: AbortSignal.timeout(2000)
                 });
@@ -1066,7 +1066,7 @@
 
             // Save to server
             try {
-                const response = await fetch('http://localhost:80075/config', {
+                const response = await fetch('http://localhost:8007/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(fullConfig),
