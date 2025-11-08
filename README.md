@@ -72,6 +72,7 @@ claude plugin install boops
 Once installed, you have access to these slash commands:
 
 - `/boops:settings` - Open the visual sound editor
+- `/boops:stop` - Stop the sound editor server
 
 ## Companion Plugins
 
@@ -138,6 +139,8 @@ Use the interactive visual editor to design sounds:
 This will:
 1. Start the sound server
 2. Open the editor in your browser
+
+When you're done, stop the server with `/boops:stop`
 
 **Using the Editor:**
 - **Drag vertically** to change frequency (pitch) - uses logarithmic scale for better low-frequency control

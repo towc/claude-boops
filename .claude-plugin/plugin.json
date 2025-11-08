@@ -11,6 +11,10 @@
     "settings": {
       "description": "Open the visual sound editor",
       "source": "./commands/settings.md"
+    },
+    "stop": {
+      "description": "Stop the sound editor server",
+      "source": "./commands/stop.md"
     }
   }
 }
